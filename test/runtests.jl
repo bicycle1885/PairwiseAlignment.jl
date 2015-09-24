@@ -20,32 +20,32 @@ let
     # equivalent sequences
     a = "A"
     b = "A"
-    algn = pairalign(GlobalAlignment(), a, b, affine_gap)
-    @test algn.score == 0
+    aln = pairalign(GlobalAlignment(), a, b, affine_gap)
+    @test aln.score == 0
     a = "ACGT"
     b = "ACGT"
-    algn = pairalign(GlobalAlignment(), a, b, affine_gap)
-    @test algn.score == 0
+    aln = pairalign(GlobalAlignment(), a, b, affine_gap)
+    @test aln.score == 0
 
     # substitution(s)
     a = "ACGT"
     b = "ATGT"
-    algn = pairalign(GlobalAlignment(), a, b, affine_gap)
-    @test algn.score == -6
+    aln = pairalign(GlobalAlignment(), a, b, affine_gap)
+    @test aln.score == -6
     a = "ACGT"
     b = "ATTT"
-    algn = pairalign(GlobalAlignment(), a, b, affine_gap)
-    @test algn.score == -12
+    aln = pairalign(GlobalAlignment(), a, b, affine_gap)
+    @test aln.score == -12
 
     # b is shorter than a
     a = "ACGT"
     b = "ACG"
-    algn = pairalign(GlobalAlignment(), a, b, affine_gap)
-    @test algn.score == -8
+    aln = pairalign(GlobalAlignment(), a, b, affine_gap)
+    @test aln.score == -8
     a = "ACGT"
     b = "AC"
-    algn = pairalign(GlobalAlignment(), a, b, affine_gap)
-    @test algn.score == -11
+    aln = pairalign(GlobalAlignment(), a, b, affine_gap)
+    @test aln.score == -11
 end
 
 let
