@@ -15,8 +15,8 @@ immutable SemiGlobalAlignment end
 
 
 # the gap penalty of length `k` is gap_open_penalty + gap_extend_penalty * k
-immutable AffineGap{T<:Real,M<:AbstractMatrix}
-    subst_matrix::M  # I hope I could write as `M{T}`
+immutable AffineGap{T<:Real}
+    subst_matrix::AbstractMatrix{T}
     gap_open_penalty::T
     gap_extend_penalty::T
 end
@@ -30,8 +30,8 @@ function AffineGap{T}(subst_matrix::AbstractMatrix{T};
 end
 
 
-include("align.jl")
 include("result.jl")
+include("interface.jl")
 include("algorithm/affinegap_global_align.jl")
 include("algorithm/affinegap_local_align.jl")
 

@@ -1,12 +1,11 @@
 # Gotoh's algorithm (Local)
 # -------------------------
 
-function affinegap_local_align{T}(a, b, affinegap::AffineGap{T})
+function affinegap_local_align{T}(a, b, subst_matrix::AbstractMatrix{T}, gap_open_penalty::T, gap_extend_penalty::T)
     m = length(a)
     n = length(b)
-    subst_matrix = affinegap.subst_matrix
-    ge = affinegap.gap_extend_penalty
-    goe = affinegap.gap_open_penalty + ge
+    ge = gap_extend_penalty
+    goe = gap_open_penalty + ge
     H = Matrix{T}(m + 1, n + 1)
     E = Matrix{T}(m, n)
     F = Matrix{T}(m, n)
@@ -51,10 +50,9 @@ function affinegap_local_align{T}(a, b, affinegap::AffineGap{T})
     return H, E, F, best_endpos
 end
 
-function traceback(a, b, H, E, F, best_endpos, affinegap)
-    subst_matrix = affinegap.subst_matrix
-    ge = affinegap.gap_extend_penalty
-    goe = affinegap.gap_open_penalty + ge
+function traceback{T}(a, b, H, E, F, best_endpos, subst_matrix::AbstractMatrix{T}, gap_open_penalty::T, gap_extend_penalty::T)
+    ge = gap_extend_penalty
+    goe = gap_open_penalty + ge
     a′ = Char[]
     b′ = Char[]
     i, j = best_endpos

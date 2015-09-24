@@ -1,12 +1,11 @@
 # Gotoh's algorithm (Global)
 # --------------------------
 
-function affinegap_global_align{T}(a, b, affinegap::AffineGap{T})
+function affinegap_global_align{T}(a, b, subst_matrix::AbstractMatrix{T}, gap_open_penalty::T, gap_extend_penalty::T)
     m = length(a)
     n = length(b)
-    subst_matrix = affinegap.subst_matrix
-    ge = affinegap.gap_extend_penalty
-    go = affinegap.gap_open_penalty
+    go = gap_open_penalty
+    ge = gap_extend_penalty
     goe = go + ge
     H = Matrix{T}(m + 1, n + 1)
     E = Matrix{T}(m, n)
@@ -45,10 +44,9 @@ function affinegap_global_align{T}(a, b, affinegap::AffineGap{T})
     return H, E, F
 end
 
-function traceback(a, b, H, E, F, affinegap)
-    subst_matrix = affinegap.subst_matrix
-    ge = affinegap.gap_extend_penalty
-    goe = affinegap.gap_open_penalty + ge
+function traceback{T}(a, b, H, E, F, subst_matrix::AbstractMatrix{T}, gap_open_penalty::T, gap_extend_penalty::T)
+    ge = gap_extend_penalty
+    goe = gap_open_penalty + ge
     a′ = Char[]
     b′ = Char[]
     i = length(a)
