@@ -41,11 +41,11 @@ let
     a = "ACGT"
     b = "ACG"
     algn = pairalign(GlobalAlignment(), a, b, affine_gap)
-    @test algn.score == -5
+    @test algn.score == -8
     a = "ACGT"
     b = "AC"
     algn = pairalign(GlobalAlignment(), a, b, affine_gap)
-    @test algn.score == -8
+    @test algn.score == -11
 end
 
 let

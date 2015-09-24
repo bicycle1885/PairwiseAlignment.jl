@@ -6,7 +6,7 @@ function local_affinegap_align{T}(a, b, affinegap::AffineGap{T})
     n = length(b)
     subst_matrix = affinegap.subst_matrix
     ge = affinegap.gap_extend_penalty
-    goe = ge + affinegap.gap_open_penalty
+    goe = affinegap.gap_open_penalty + ge
     H = Matrix{T}(m + 1, n + 1)
     E = Matrix{T}(m, n)
     F = Matrix{T}(m, n)
@@ -54,7 +54,7 @@ end
 function traceback(a, b, H, E, F, best_endpos, affinegap)
     subst_matrix = affinegap.subst_matrix
     ge = affinegap.gap_extend_penalty
-    goe = ge + affinegap.gap_open_penalty
+    goe = affinegap.gap_open_penalty + ge
     a′ = Char[]
     b′ = Char[]
     i, j = best_endpos
