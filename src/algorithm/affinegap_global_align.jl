@@ -1,7 +1,7 @@
 # Gotoh's algorithm (Global)
 # --------------------------
 
-function global_affinegap_align{T}(a, b, affinegap::AffineGap{T})
+function affinegap_global_align{T}(a, b, affinegap::AffineGap{T})
     m = length(a)
     n = length(b)
     subst_matrix = affinegap.subst_matrix
