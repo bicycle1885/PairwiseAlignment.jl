@@ -23,7 +23,7 @@ function affinegap_global_align{T}(a, b, subst_matrix::AbstractMatrix{T}, gap_op
             else
                 E[i,j] = max(
                     E[i,j-1] - ge,
-                    H[i+1,j] - go
+                    H[i+1,j] - goe
                 )
             end
             if i == 1

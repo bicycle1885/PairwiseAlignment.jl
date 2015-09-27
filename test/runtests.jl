@@ -95,6 +95,38 @@ let
 end
 
 let
+    affine_gap = AffineGap(
+        SimpleSubstMatrix(0, -6),
+        gap_open_penalty=5,
+        gap_extend_penalty=3
+    )
+    # same length
+    for (a, b) in [("A", "A"), ("ACGT", "ACGT"), ("ACGT", "ACGG")]
+        aln1 = pairalign(GlobalAlignment(), a, b, affine_gap, banded=false, score_only=false)
+        aln2 = pairalign(GlobalAlignment(), a, b, affine_gap, banded=false, score_only=true)
+        aln3 = pairalign(GlobalAlignment(), a, b, affine_gap, banded=true,  score_only=false)
+        aln4 = pairalign(GlobalAlignment(), a, b, affine_gap, banded=true,  score_only=true)
+        @test aln1.score == aln2.score == aln3.score == aln4.score
+    end
+    for (a, b) in [("A", "AT"), ("A", "ATT"), ("ACGT", "ACGTT"), ("ACGT", "ACGGT"), ("ACGT", "ACCCGT")]
+        # b is longer
+        aln1 = pairalign(GlobalAlignment(), a, b, affine_gap, banded=false, score_only=false)
+        aln2 = pairalign(GlobalAlignment(), a, b, affine_gap, banded=false, score_only=true)
+        aln3 = pairalign(GlobalAlignment(), a, b, affine_gap, banded=true,  lower=2, upper=2, score_only=false)
+        aln4 = pairalign(GlobalAlignment(), a, b, affine_gap, banded=true,  lower=2, upper=2, score_only=true)
+        @test aln1.score == aln2.score == aln3.score == aln4.score
+
+        # a is longer
+        a, b = b, a
+        aln1 = pairalign(GlobalAlignment(), a, b, affine_gap, banded=false, score_only=false)
+        aln2 = pairalign(GlobalAlignment(), a, b, affine_gap, banded=false, score_only=true)
+        aln3 = pairalign(GlobalAlignment(), a, b, affine_gap, banded=true,  lower=2, upper=2, score_only=false)
+        aln4 = pairalign(GlobalAlignment(), a, b, affine_gap, banded=true,  lower=2, upper=2, score_only=true)
+        @test aln1.score == aln2.score == aln3.score == aln4.score
+    end
+end
+
+let
     # Local Alignment
     affine_gap = AffineGap(
         SimpleSubstMatrix(3, -1),
