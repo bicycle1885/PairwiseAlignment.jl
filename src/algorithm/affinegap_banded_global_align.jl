@@ -100,3 +100,7 @@ function traceback(a, b, H, E, F, L, U, subst_matrix, gap_open_penalty, gap_exte
     reverse!(b′)
     return ASCIIString(a′), ASCIIString(b′)
 end
+
+function isinband(i, j, L, U, a, b)
+    return 0 ≤ i ≤ length(a) && 0 ≤ j ≤ length(b) && i - L ≤ j ≤ i + U
+end

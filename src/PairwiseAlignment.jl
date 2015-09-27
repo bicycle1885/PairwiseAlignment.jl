@@ -31,7 +31,7 @@ end
 
 
 include("result.jl")
-include("interface.jl")
+include("pairalign.jl")
 include("algorithm/affinegap_global_align.jl")
 include("algorithm/affinegap_local_align.jl")
 include("algorithm/affinegap_banded_global_align.jl")
