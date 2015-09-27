@@ -168,3 +168,71 @@ let
     aln = pairalign(LocalAlignment(), a, b, affine_gap)
     @test aln.score == 3 * 6 - (2 + 1 + 1)
 end
+
+let
+    # Hamming Distance
+    a = "ACGT"
+    b = "ACGT"
+    aln = pairalign(HammingDistance(), a, b)
+    @test aln.score == 0
+    a = "ACGT"
+    b = "ACCT"
+    aln = pairalign(HammingDistance(), a, b)
+    @test aln.score == 1
+    a = "ACGT"
+    b = "ACG"
+    @test_throws ErrorException pairalign(HammingDistance(), a, b)
+end
+
+let
+    # Levenshtein Distance
+    a = "ACGT"
+    b = "ACGT"
+    aln = pairalign(LevenshteinDistance(), a, b)
+    @test aln.score == 0
+    a = "ACGT"
+    b = "ACCT"
+    aln = pairalign(LevenshteinDistance(), a, b)
+    @test aln.score == 1
+    a = "ACGT"
+    b = "ACGGA"
+    aln = pairalign(LevenshteinDistance(), a, b)
+    @test aln.score == 2
+    aln = pairalign(LevenshteinDistance(), b, a)
+    @test aln.score == 2
+end
+
+immutable SimpleCostMatrix{T} <: AbstractSubstitutionMatrix{T}
+    mismatching_cost::T
+end
+
+Base.getindex{T}(m::SimpleCostMatrix{T}, x, y) = ifelse(x == y, 0, m.mismatching_cost)
+
+let
+    # Edit Distance
+    costmodel = CostModel(
+        SimpleCostMatrix(3),
+        insertion_cost=4,
+        deletion_cost=5
+    )
+
+    # equivalent sequences
+    a = "ACGT"
+    b = "ACGT"
+    aln = pairalign(EditDistance(), a, b, costmodel)
+    @test aln.score == 0
+
+    # substitution
+    a = "ACGT"
+    b = "ACCT"
+    aln = pairalign(EditDistance(), a, b, costmodel)
+    @test aln.score == 3
+
+    # indel
+    a = "ACG"
+    b = "ACGT"
+    aln = pairalign(EditDistance(), a, b, costmodel)
+    @test aln.score == 4
+    aln = pairalign(EditDistance(), b, a, costmodel)
+    @test aln.score == 5
+end

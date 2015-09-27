@@ -55,3 +55,40 @@ function pairalign(::LocalAlignment, a, b, score::AffineGap;
     end
     error("not implemented")
 end
+
+function pairalign(::EditDistance, a, b, cost::AbstractCostModel;
+                   distance_only::Bool=false)
+    subst_matrix = cost.subst_matrix
+    insertion_cost = cost.insertion_cost
+    deletion_cost = cost.deletion_cost
+    if distance_only
+        D = edit_distance(a, b, subst_matrix, insertion_cost, deletion_cost)
+        return AlignmentResult(D[end,end])
+    else
+        D = edit_distance(a, b, subst_matrix, insertion_cost, deletion_cost)
+        a′, b′ = traceback(a, b, D, subst_matrix, insertion_cost, deletion_cost)
+        return AlignmentResult(D[end,end], a′, b′)
+    end
+end
+
+function pairalign(::LevenshteinDistance, a, b;
+                   distance_only::Bool=false)
+    unit_cost = UnitCostModel{Int}()
+    insertion_cost = 1
+    deletion_cost  = 1
+    cost = CostModel(unit_cost, insertion_cost, deletion_cost)
+    return pairalign(EditDistance(), a, b, cost,
+                     distance_only=distance_only)
+end
+
+function pairalign(::HammingDistance, a, b;
+                   distance_only::Bool=false)
+    if length(a) != length(b)
+        error("two sequences should be same length")
+    end
+    if distance_only
+        return AlignmentResult(hamming_distance(Int, a, b))
+    else
+        return AlignmentResult(hamming_distance(Int, a, b), a, b)
+    end
+end
