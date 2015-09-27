@@ -17,7 +17,7 @@ function affinegap_banded_global_align{T}(a, b, L::Int, U::Int, subst_matrix::Ab
     # In order to save the working space, the matrices are vertically sheared.
     # Namely, the coordinate is transformed as (i, j) → (i-j+U, j), where
     # H[i+1,j+1] stores the best score of two prefixes: a[1:i] and b[1:j].
-    # To avoid confusion, the matrices are specified as following formats:
+    # To avoid confusion, the indices are specified as following formats:
     #   * H[i-j+U+1,j+1]
     #   * E[i-j+U+1,j  ]  (j ≥ 1)
     #   * F[i-j+U+1,j  ]  (j ≥ 1)
@@ -67,30 +67,32 @@ function traceback(a, b, H, E, F, L, U, subst_matrix, gap_open_penalty, gap_exte
     m = length(a)
     n = length(b)
     ge = gap_extend_penalty
-    goe = gap_open_penalty
+    goe = gap_open_penalty + ge
     L = min(L, m)
     U = min(U, n)
+    a′ = Char[]
+    b′ = Char[]
     i = m
     j = n
     while i ≥ 1 || j ≥ 1
-        i′ = i - j + U
-        if i ≥ 1 && j ≥ 1 && H[(i-1)-(j-1)+U+1,j] == H[i′+1,j+1] - subst_matrix[a[i],b[j]]
+        if i ≥ 1 && j ≥ 1 && H[i-j+U+1,j+1] == H[(i-1)-(j-1)+U+1,(j-1)+1] + subst_matrix[a[i],b[j]]
             # ↖
             push!(a′, a[i])
             push!(b′, b[j])
             i -= 1
             j -= 1
-        elseif i == 0
+        elseif i == 0 || (j ≥ 1 && H[i-j+U+1,j+1] == E[i-j+U+1,j] && (j > i - L && (E[i-j+U+1,j] == E[i-(j-1)+U+1,j-1] - ge || E[i-j+U+1,j] == H[i-(j-1)+U+1,(j-1)+1] - goe)))
             # ←
             push!(a′, '-')
             push!(b′, b[j])
             j -= 1
-        elseif j == 0
+        elseif j == 0 || (i ≥ 1 && H[i-j+U+1,j+1] == F[i-j+U+1,j] && (j < i + U && (F[i-j+U+1,j] == F[(i-1)-j+U+1,j] - ge || F[i-j+U+1,j] == H[(i-1)-j+U+1,j+1] - goe)))
             # ↑
             push!(a′, a[i])
             push!(b′, '-')
             i -= 1
         else
+            @show i, j
             @assert false
         end
     end

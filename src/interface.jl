@@ -14,7 +14,7 @@ function pairalign(::GlobalAlignment, a, b, score::AffineGap;
             return AlignmentResult(H[bestpos...])
         else
             H, E, F, bestpos = affinegap_banded_global_align(a, b, lower, upper, subst_matrix, gap_open_penalty, gap_extend_penalty)
-            a′, b′ = traceback(a, b, H, E, F, subst_matrix, gap_open_penalty, gap_extend_penalty)
+            a′, b′ = traceback(a, b, H, E, F, lower, upper, subst_matrix, gap_open_penalty, gap_extend_penalty)
             return AlignmentResult(H[bestpos...], a′, b′)
         end
     else
