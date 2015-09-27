@@ -58,39 +58,33 @@ let
 
     a = "A"
     b = "A"
-    aln = pairalign(GlobalAlignment(), a, b, affine_gap,
-                    banded=true, score_only=true)
+    aln = pairalign(GlobalAlignment(), a, b, affine_gap, banded=true)
     @test aln.score == 0
     a = "ACGT"
     b = "ACGT"
-    aln = pairalign(GlobalAlignment(), a, b, affine_gap,
-                    banded=true, score_only=true)
+    aln = pairalign(GlobalAlignment(), a, b, affine_gap, banded=true)
     @test aln.score == 0
 
     # substitution(s)
     a = "ACGT"
     b = "ATGT"
-    aln = pairalign(GlobalAlignment(), a, b, affine_gap,
-                    banded=true, score_only=true)
+    aln = pairalign(GlobalAlignment(), a, b, affine_gap, banded=true)
     @test aln.score == -6
     a = "ACGT"
     b = "ATTT"
-    aln = pairalign(GlobalAlignment(), a, b, affine_gap,
-                    banded=true, score_only=true)
+    aln = pairalign(GlobalAlignment(), a, b, affine_gap, banded=true)
     @test aln.score == -12
 
     # b is shorter than a
     a = "ACGT"
     b = "ACG"
     aln = pairalign(GlobalAlignment(), a, b, affine_gap,
-                    banded=true, score_only=true,
-                    lower=1, upper=1)
+                    banded=true, lower=1, upper=1)
     @test aln.score == -8
     a = "ACGT"
     b = "AC"
     aln = pairalign(GlobalAlignment(), a, b, affine_gap,
-                    banded=true, score_only=true,
-                    lower=2, upper=2)
+                    banded=true, lower=2, upper=2)
     @test aln.score == -11
 end
 
