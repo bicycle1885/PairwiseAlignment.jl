@@ -28,38 +28,75 @@ let
     affine_gap = AffineGapScoreModel(
         SimpleSubstMatrix(0, -6),
         gap_open_penalty=5,
-        gap_extend_penalty=3
+        gap_extend_penalty=2
     )
 
-    # equivalent sequences
+    a = ""
+    b = "A"
+    aln1 = pairalign(GlobalAlignment(), a, b, affine_gap)
+    aln2 = pairalign(GlobalAlignment(), b, a, affine_gap)
+    @test aln1.score == aln2.score == -7
+
+    a = ""
+    b = "AC"
+    aln1 = pairalign(GlobalAlignment(), a, b, affine_gap)
+    aln2 = pairalign(GlobalAlignment(), b, a, affine_gap)
+    @test aln1.score == aln2.score == -9
+
     a = "A"
     b = "A"
-    aln = pairalign(GlobalAlignment(), a, b, affine_gap)
-    @test aln.score == 0
+    aln1 = pairalign(GlobalAlignment(), a, b, affine_gap)
+    aln2 = pairalign(GlobalAlignment(), b, a, affine_gap)
+    @test aln1.score == aln2.score == 0
+
     a = "ACGT"
     b = "ACGT"
-    aln = pairalign(GlobalAlignment(), a, b, affine_gap)
-    @test aln.score == 0
+    aln1 = pairalign(GlobalAlignment(), a, b, affine_gap)
+    aln2 = pairalign(GlobalAlignment(), b, a, affine_gap)
+    @test aln1.score == aln2.score == 0
 
-    # substitution(s)
     a = "ACGT"
     b = "ATGT"
-    aln = pairalign(GlobalAlignment(), a, b, affine_gap)
-    @test aln.score == -6
+    aln1 = pairalign(GlobalAlignment(), a, b, affine_gap)
+    aln2 = pairalign(GlobalAlignment(), b, a, affine_gap)
+    @test aln1.score == aln2.score == -6
+
+    a = "ACGT"
+    b = "TCGA"
+    aln1 = pairalign(GlobalAlignment(), a, b, affine_gap)
+    aln2 = pairalign(GlobalAlignment(), b, a, affine_gap)
+    @test aln1.score == aln2.score == -12
+
     a = "ACGT"
     b = "ATTT"
-    aln = pairalign(GlobalAlignment(), a, b, affine_gap)
-    @test aln.score == -12
+    aln1 = pairalign(GlobalAlignment(), a, b, affine_gap)
+    aln2 = pairalign(GlobalAlignment(), b, a, affine_gap)
+    @test aln1.score == aln2.score == -12
 
-    # b is shorter than a
     a = "ACGT"
     b = "ACG"
-    aln = pairalign(GlobalAlignment(), a, b, affine_gap)
-    @test aln.score == -8
+    aln1 = pairalign(GlobalAlignment(), a, b, affine_gap)
+    aln2 = pairalign(GlobalAlignment(), b, a, affine_gap)
+    @test aln1.score == aln2.score == -7
+
     a = "ACGT"
     b = "AC"
-    aln = pairalign(GlobalAlignment(), a, b, affine_gap)
-    @test aln.score == -11
+    aln1 = pairalign(GlobalAlignment(), a, b, affine_gap)
+    aln2 = pairalign(GlobalAlignment(), b, a, affine_gap)
+    @test aln1.score == aln2.score == -9
+
+    a = "ACGT"
+    b = "A  T" |> rmspaces
+    aln1 = pairalign(GlobalAlignment(), a, b, affine_gap)
+    aln2 = pairalign(GlobalAlignment(), b, a, affine_gap)
+    @test aln1.score == aln2.score == -9
+
+    a = "CGTATCCAACGG     TTGTGGGA " |> rmspaces
+    #     ||||| || ||      |||| ||
+    b = " GTATCAAATGGACCCACTGTGTGAG" |> rmspaces
+    aln1 = pairalign(GlobalAlignment(), a, b, affine_gap)
+    aln2 = pairalign(GlobalAlignment(), b, a, affine_gap)
+    @test aln1.score == aln2.score == -7 + -6 + -6 + -15 + -6 + -6 + -7
 end
 
 let
@@ -67,39 +104,79 @@ let
     affine_gap = AffineGapScoreModel(
         SimpleSubstMatrix(0, -6),
         gap_open_penalty=5,
-        gap_extend_penalty=3
+        gap_extend_penalty=2
     )
+
+    a = ""
+    b = "A"
+    aln1 = pairalign(GlobalAlignment(), a, b, affine_gap, banded=true, lower=1, upper=1)
+    aln2 = pairalign(GlobalAlignment(), b, a, affine_gap, banded=true, lower=1, upper=1)
+    @test aln1.score == aln2.score == -7
+
+    a = ""
+    b = "AC"
+    aln1 = pairalign(GlobalAlignment(), a, b, affine_gap, banded=true, lower=2, upper=2)
+    aln2 = pairalign(GlobalAlignment(), b, a, affine_gap, banded=true, lower=2, upper=2)
+    @test aln1.score == aln2.score == -9
 
     a = "A"
     b = "A"
-    aln = pairalign(GlobalAlignment(), a, b, affine_gap, banded=true)
-    @test aln.score == 0
+    aln1 = pairalign(GlobalAlignment(), a, b, affine_gap, banded=true, lower=1, upper=1)
+    aln2 = pairalign(GlobalAlignment(), b, a, affine_gap, banded=true, lower=1, upper=1)
+    @test aln1.score == aln2.score == 0
+
     a = "ACGT"
     b = "ACGT"
-    aln = pairalign(GlobalAlignment(), a, b, affine_gap, banded=true)
-    @test aln.score == 0
+    aln1 = pairalign(GlobalAlignment(), a, b, affine_gap, banded=true, lower=1, upper=1)
+    aln2 = pairalign(GlobalAlignment(), b, a, affine_gap, banded=true, lower=1, upper=1)
+    @test aln1.score == aln2.score == 0
 
-    # substitution(s)
     a = "ACGT"
     b = "ATGT"
-    aln = pairalign(GlobalAlignment(), a, b, affine_gap, banded=true)
-    @test aln.score == -6
+    aln1 = pairalign(GlobalAlignment(), a, b, affine_gap, banded=true, lower=1, upper=1)
+    aln2 = pairalign(GlobalAlignment(), b, a, affine_gap, banded=true, lower=1, upper=1)
+    @test aln1.score == aln2.score == -6
+
+    a = "ACGT"
+    b = "TCGA"
+    aln1 = pairalign(GlobalAlignment(), a, b, affine_gap, banded=true, lower=1, upper=1)
+    aln2 = pairalign(GlobalAlignment(), b, a, affine_gap, banded=true, lower=1, upper=1)
+    @test aln1.score == aln2.score == -12
+
     a = "ACGT"
     b = "ATTT"
-    aln = pairalign(GlobalAlignment(), a, b, affine_gap, banded=true)
-    @test aln.score == -12
+    aln1 = pairalign(GlobalAlignment(), a, b, affine_gap, banded=true, lower=1, upper=1)
+    aln2 = pairalign(GlobalAlignment(), b, a, affine_gap, banded=true, lower=1, upper=1)
+    @test aln1.score == aln2.score == -12
 
-    # b is shorter than a
     a = "ACGT"
     b = "ACG"
-    aln = pairalign(GlobalAlignment(), a, b, affine_gap,
-                    banded=true, lower=1, upper=1)
-    @test aln.score == -8
+    aln1 = pairalign(GlobalAlignment(), a, b, affine_gap, banded=true, lower=1, upper=1)
+    aln2 = pairalign(GlobalAlignment(), b, a, affine_gap, banded=true, lower=1, upper=1)
+    @test aln1.score == aln2.score == -7
+
     a = "ACGT"
     b = "AC"
-    aln = pairalign(GlobalAlignment(), a, b, affine_gap,
-                    banded=true, lower=2, upper=2)
-    @test aln.score == -11
+    aln1 = pairalign(GlobalAlignment(), a, b, affine_gap, banded=true, lower=2, upper=2)
+    aln2 = pairalign(GlobalAlignment(), b, a, affine_gap, banded=true, lower=2, upper=2)
+    @test aln1.score == aln2.score == -9
+
+    a = "ACGT"
+    b = "A  T" |> rmspaces
+    aln1 = pairalign(GlobalAlignment(), a, b, affine_gap, banded=true, lower=2, upper=2)
+    aln2 = pairalign(GlobalAlignment(), b, a, affine_gap, banded=true, lower=2, upper=2)
+    @test aln1.score == aln2.score == -9
+
+    a = "TATGGCCCG TAG   TTT" |> rmspaces
+    b = "TA    CCGATAGGGGTTA" |> rmspaces
+    aln1_1 = pairalign(GlobalAlignment(), a, b, affine_gap, banded=true, lower=1, upper=1)
+    aln2_1 = pairalign(GlobalAlignment(), b, a, affine_gap, banded=true, lower=1, upper=1)
+    aln1_3 = pairalign(GlobalAlignment(), a, b, affine_gap, banded=true, lower=3, upper=3)
+    aln2_3 = pairalign(GlobalAlignment(), b, a, affine_gap, banded=true, lower=3, upper=3)
+    aln1_5 = pairalign(GlobalAlignment(), a, b, affine_gap, banded=true, lower=5, upper=5)
+    aln2_5 = pairalign(GlobalAlignment(), b, a, affine_gap, banded=true, lower=5, upper=5)
+    #@show aln1_1 aln1_3 aln1_5
+    @test aln1_1.score == aln2_1.score < aln1_3.score == aln1_3.score < aln1_5.score == aln2_5.score == -13 + -7 + -11 + -6
 end
 
 let
