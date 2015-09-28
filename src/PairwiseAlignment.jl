@@ -2,6 +2,8 @@ module PairwiseAlignment
 
 export
     pairalign,
+    # types
+    GappedSequence,
     # scoring systems
     AbstractSubstitutionMatrix,
     SubstitutionMatrix,
@@ -31,6 +33,7 @@ immutable HammingDistance end
 immutable LevenshteinDistance end
 
 
+include("gapped_sequence.jl")
 include("model.jl")
 include("result.jl")
 include("pairalign.jl")

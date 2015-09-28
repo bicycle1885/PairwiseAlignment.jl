@@ -2,6 +2,28 @@ using PairwiseAlignment
 using Base.Test
 
 let
+    seq = "ACGT"
+    gseq = GappedSequence(seq)
+    @test isa(gseq, GappedSequence{ASCIIString})
+    @test length(gseq) == 4
+
+    counts = [2, 2, 2, 0]
+    gseq = GappedSequence(seq, counts)
+    @test length(gseq) == 6
+    @test string(gseq) == "AC--GT"
+
+    counts = [0, 2, 2, 2, 2, 2]
+    gseq = GappedSequence(seq, counts)
+    @test length(gseq) == 10
+    @test string(gseq) == "--AC--GT--"
+
+    counts = [1, 1, 1, 1]
+    gseq = GappedSequence(seq, 3, counts)
+    @test length(gseq) == 4
+    @test string(gseq) == "G-T-"
+end
+
+let
     # a substitution matrix
     subst_matrix = SubstitutionMatrix(eye(5, 5))
     @test subst_matrix[0,0] == 1.0

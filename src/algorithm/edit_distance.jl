@@ -23,29 +23,33 @@ function edit_distance{T}(a, b, subst_matrix::AbstractSubstitutionMatrix{T}, ins
 end
 
 function traceback(a, b, D, subst_matrix, insertion_cost, deletion_cost)
-    a′ = Char[]
-    b′ = Char[]
+    # gap/character counts (reversed order)
+    counts_a = [0, 0]
+    counts_b = [0, 0]
     i = length(a)
     j = length(b)
     while i ≥ 1 || j ≥ 1
         if i ≥ 1 && j ≥ 1 && D[i+1,j+1] == D[i,j] + subst_matrix[a[i],b[j]]
-            push!(a′, a[i])
-            push!(b′, b[j])
+            gap_a = false
+            gap_b = false
             i -= 1
             j -= 1
         elseif i == 0 || (j ≥ 1 && D[i+1,j+1] == D[i+1,j] + insertion_cost)
-            push!(a′, '-')
-            push!(b′, b[j])
+            gap_a = true
+            gap_b = false
             j -= 1
         elseif j == 0 || (i ≥ 1 && D[i+1,j+1] == D[i,j+1] + deletion_cost)
-            push!(a′, a[i])
-            push!(b′, '-')
+            gap_a = false
+            gap_b = true
             i -= 1
         else
             @assert false
         end
+        # update counts
+        update_counts!(counts_a, gap_a)
+        update_counts!(counts_b, gap_b)
     end
-    reverse!(a′)
-    reverse!(b′)
-    return ASCIIString(a′), ASCIIString(b′)
+    reverse!(counts_a)
+    reverse!(counts_b)
+    return GappedSequence(a, counts_a), GappedSequence(b, counts_b)
 end

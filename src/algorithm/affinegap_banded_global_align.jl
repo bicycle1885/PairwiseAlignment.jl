@@ -72,37 +72,61 @@ function traceback(a, b, H, E, F, L, U, subst_matrix, gap_open_penalty, gap_exte
     goe = gap_open_penalty + ge
     L = min(L, m)
     U = min(U, n)
-    a′ = Char[]
-    b′ = Char[]
+    # gap/character counts (reversed order)
+    counts_a = [0, 0]
+    counts_b = [0, 0]
     i = m
     j = n
     while i ≥ 1 || j ≥ 1
         if i ≥ 1 && j ≥ 1 && H[i-j+U+1,j+1] == H[(i-1)-(j-1)+U+1,(j-1)+1] + subst_matrix[a[i],b[j]]
             # ↖
-            push!(a′, a[i])
-            push!(b′, b[j])
+            # ...a[i]...
+            #    |
+            # ...b[j]...
+            gap_a = false
+            gap_b = false
             i -= 1
             j -= 1
         elseif i == 0 || (j ≥ 1 && H[i-j+U+1,j+1] == E[i-j+U+1,j] && (j > i - L && (E[i-j+U+1,j] == E[i-(j-1)+U+1,j-1] - ge || E[i-j+U+1,j] == H[i-(j-1)+U+1,(j-1)+1] - goe)))
             # ←
-            push!(a′, '-')
-            push!(b′, b[j])
+            # ... -    ...
+            #     |
+            # ... b[j] ...
+            gap_a = true
+            gap_b = false
             j -= 1
         elseif j == 0 || (i ≥ 1 && H[i-j+U+1,j+1] == F[i-j+U+1,j] && (j < i + U && (F[i-j+U+1,j] == F[(i-1)-j+U+1,j] - ge || F[i-j+U+1,j] == H[(i-1)-j+U+1,j+1] - goe)))
             # ↑
-            push!(a′, a[i])
-            push!(b′, '-')
+            # ... a[i] ...
+            #     |
+            # ... -    ...
+            gap_a = false
+            gap_b = true
             i -= 1
         else
-            @show i, j
             @assert false
         end
+        # update counts
+        update_counts!(counts_a, gap_a)
+        update_counts!(counts_b, gap_b)
     end
-    reverse!(a′)
-    reverse!(b′)
-    return ASCIIString(a′), ASCIIString(b′)
+    reverse!(counts_a)
+    reverse!(counts_b)
+    return GappedSequence(a, counts_a), GappedSequence(b, counts_b)
 end
 
 function isinband(i, j, L, U, a, b)
     return 0 ≤ i ≤ length(a) && 0 ≤ j ≤ length(b) && i - L ≤ j ≤ i + U
+end
+
+function update_counts!(counts, isgap)
+    if isgap
+        if counts[end] > 0
+            push!(counts, 0, 0)
+        end
+        counts[end-1] += 1
+    else
+        counts[end] += 1
+    end
+    return counts
 end

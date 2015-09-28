@@ -55,33 +55,38 @@ end
 function traceback(a, b, H, E, F, best_endpos, subst_matrix, gap_open_penalty, gap_extend_penalty)
     ge = gap_extend_penalty
     goe = gap_open_penalty + ge
-    a′ = Char[]
-    b′ = Char[]
+    # gap/character counts (reversed order)
+    counts_a = [0, 0]
+    counts_b = [0, 0]
     i, j = best_endpos
     while H[i,j] > 0
         if i ≥ 1 && j ≥ 1 && H[i+1,j+1] == H[i,j] + subst_matrix[a[i],b[j]]
             # ↖
-            push!(a′, a[i])
-            push!(b′, b[j])
+            gap_a = false
+            gap_b = false
             i -= 1
             j -= 1
         elseif i == 0 || (j ≥ 1 && H[i+1,j+1] == E[i,j] && ((j ≥ 2 && E[i,j] == E[i,j-1] - ge) || E[i,j] == H[i+1,j] - goe))
             # ←
-            push!(a′, '-')
-            push!(b′, b[j])
+            gap_a = true
+            gap_b = false
             j -= 1
         elseif j == 0 || (i ≥ 1 && H[i+1,j+1] == F[i,j] && ((i ≥ 2 && F[i,j] == F[i-1,j] - ge) || F[i,j] == H[i,j+1] - goe))
             # ↑
-            push!(a′, a[i])
-            push!(b′, '-')
+            gap_a = false
+            gap_b = true
             i -= 1
         else
             @assert false
         end
+        # update counts
+        update_counts!(counts_a, gap_a)
+        update_counts!(counts_b, gap_b)
     end
-    push!(a′, a[i])
-    push!(b′, b[j])
-    reverse!(a′)
-    reverse!(b′)
-    return ASCIIString(a′), ASCIIString(b′)
+    # update counts
+    update_counts!(counts_a, false)
+    update_counts!(counts_b, false)
+    reverse!(counts_a)
+    reverse!(counts_b)
+    return GappedSequence(a, i, counts_a), GappedSequence(b, j, counts_b)
 end
