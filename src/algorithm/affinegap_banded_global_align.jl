@@ -22,41 +22,43 @@ function affinegap_banded_global_align{T}(a, b, L::Int, U::Int, subst_matrix::Ab
     #   * E[i-j+U+1,j  ]  (j ≥ 1)
     #   * F[i-j+U+1,j  ]  (j ≥ 1)
     # Hope these expressions are optimized away.
-    H[0-0+U+1,0+1] = T(0)
-    for i in 1:L
-        H[i-0+U+1,0+1] = -(go + ge * i)
-    end
-    for j in 1:n
-        if j ≤ U
-            H[0-j+U+1,j+1] = -(go + ge * j)
+    @inbounds begin
+        H[0-0+U+1,0+1] = T(0)
+        for i in 1:L
+            H[i-0+U+1,0+1] = -(go + ge * i)
         end
-        # vertical bounds along the j-th column
-        lo = max(1, j - U)
-        hi = min(m, j + L)
-        for i in lo:hi
-            if j == 1 || i == j + L
-                # add gap_extend_penalty to avoid overflow
-                E[i-j+U+1,j] = typemin(T) + ge
-            else
-                E[i-j+U+1,j] = max(
-                    H[i-(j-1)+U+1,(j-1)+1] - goe,
-                    E[i-(j-1)+U+1,(j-1)  ] - ge
+        for j in 1:n
+            if j ≤ U
+                H[0-j+U+1,j+1] = -(go + ge * j)
+            end
+            # vertical bounds along the j-th column
+            lo = max(1, j - U)
+            hi = min(m, j + L)
+            for i in lo:hi
+                if j == 1 || i == j + L
+                    # add gap_extend_penalty to avoid overflow
+                    E[i-j+U+1,j] = typemin(T) + ge
+                else
+                    E[i-j+U+1,j] = max(
+                        H[i-(j-1)+U+1,(j-1)+1] - goe,
+                        E[i-(j-1)+U+1,(j-1)  ] - ge
+                    )
+                end
+                if i == 1 || j == i + U
+                    # add gap_extend_penalty to avoid overflow
+                    F[i-j+U+1,j] = typemin(T) + ge
+                else
+                    F[i-j+U+1,j] = max(
+                        H[(i-1)-j+U+1,j+1] - goe,
+                        F[(i-1)-j+U+1,j  ] - ge
+                    )
+                end
+                H[i-j+U+1,j+1] = max(
+                    E[i-j+U+1,j],
+                    F[i-j+U+1,j],
+                    H[(i-1)-(j-1)+U+1,(j-1)+1] + subst_matrix[a[i],b[j]]
                 )
             end
-            if i == 1 || j == i + U
-                # add gap_extend_penalty to avoid overflow
-                F[i-j+U+1,j] = typemin(T) + ge
-            else
-                F[i-j+U+1,j] = max(
-                    H[(i-1)-j+U+1,j+1] - goe,
-                    F[(i-1)-j+U+1,j  ] - ge
-                )
-            end
-            H[i-j+U+1,j+1] = max(
-                E[i-j+U+1,j],
-                F[i-j+U+1,j],
-                H[(i-1)-(j-1)+U+1,(j-1)+1] + subst_matrix[a[i],b[j]]
-            )
         end
     end
     # the best alignment score is H[m-n+U+1,n+1]

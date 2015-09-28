@@ -10,40 +10,42 @@ function affinegap_local_align{T}(a, b, subst_matrix::AbstractSubstitutionMatrix
     E = Matrix{T}(m, n)
     F = Matrix{T}(m, n)
     # run dynamic programming column by column
-    H[1,1] = T(0)
-    for i in 1:m
-        H[i+1,1] = T(0)
-    end
-    best_score = typemin(T)
-    best_endpos = (0, 0)
-    for j in 1:n
-        H[1,j+1] = T(0)
+    @inbounds begin
+        H[1,1] = T(0)
         for i in 1:m
-            if j == 1
-                E[i,j] = H[i+1,j] - goe
-            else
-                E[i,j] = max(
-                    E[i,j-1] - ge,
-                    H[i+1,j] - goe
+            H[i+1,1] = T(0)
+        end
+        best_score = typemin(T)
+        best_endpos = (0, 0)
+        for j in 1:n
+            H[1,j+1] = T(0)
+            for i in 1:m
+                if j == 1
+                    E[i,j] = H[i+1,j] - goe
+                else
+                    E[i,j] = max(
+                        E[i,j-1] - ge,
+                        H[i+1,j] - goe
+                    )
+                end
+                if i == 1
+                    F[i,j] = H[i,j+1] - goe
+                else
+                    F[i,j] = max(
+                        F[i-1,j] - ge,
+                        H[i,j+1] - goe
+                    )
+                end
+                H[i+1,j+1] = max(
+                    T(0),
+                    E[i,j],
+                    F[i,j],
+                    H[i,j] + subst_matrix[a[i],b[j]]
                 )
-            end
-            if i == 1
-                F[i,j] = H[i,j+1] - goe
-            else
-                F[i,j] = max(
-                    F[i-1,j] - ge,
-                    H[i,j+1] - goe
-                )
-            end
-            H[i+1,j+1] = max(
-                T(0),
-                E[i,j],
-                F[i,j],
-                H[i,j] + subst_matrix[a[i],b[j]]
-            )
-            if H[i+1,j+1] > best_score
-                best_score = H[i+1,j+1]
-                best_endpos = (i, j)
+                if H[i+1,j+1] > best_score
+                    best_score = H[i+1,j+1]
+                    best_endpos = (i, j)
+                end
             end
         end
     end
