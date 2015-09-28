@@ -1,7 +1,7 @@
 using PairwiseAlignment
 using Base.Test
 
-immutable SimpleSubstMatrix{T} <: AbstractMatrix{T}
+immutable SimpleSubstMatrix{T} <: AbstractSubstitutionMatrix{T}
     matching_score::T
     mismatching_score::T
 end
@@ -11,7 +11,7 @@ rmspaces(s) = replace(s, ' ', "")
 
 let
     # Global Alignment
-    affine_gap = AffineGap(
+    affine_gap = AffineGapScoreModel(
         SimpleSubstMatrix(0, -6),
         gap_open_penalty=5,
         gap_extend_penalty=3
@@ -50,7 +50,7 @@ end
 
 let
     # Banded Global Alignment
-    affine_gap = AffineGap(
+    affine_gap = AffineGapScoreModel(
         SimpleSubstMatrix(0, -6),
         gap_open_penalty=5,
         gap_extend_penalty=3
@@ -89,7 +89,7 @@ let
 end
 
 let
-    affine_gap = AffineGap(
+    affine_gap = AffineGapScoreModel(
         SimpleSubstMatrix(0, -6),
         gap_open_penalty=5,
         gap_extend_penalty=3
@@ -122,7 +122,7 @@ end
 
 let
     # Local Alignment
-    affine_gap = AffineGap(
+    affine_gap = AffineGapScoreModel(
         SimpleSubstMatrix(3, -1),
         gap_open_penalty=2,
         gap_extend_penalty=1

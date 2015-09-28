@@ -1,7 +1,7 @@
 # Interfaces
 # ----------
 
-function pairalign(::GlobalAlignment, a, b, score::AffineGap;
+function pairalign(::GlobalAlignment, a, b, score::AffineGapScoreModel;
                    score_only::Bool=false,
                    banded::Bool=false, lower::Int=0, upper::Int=0,
                    #linear_space::Bool=score_only,
@@ -39,7 +39,7 @@ function pairalign(::GlobalAlignment, a, b, score::AffineGap;
     error("not implemented")
 end
 
-function pairalign(::LocalAlignment, a, b, score::AffineGap;
+function pairalign(::LocalAlignment, a, b, score::AffineGapScoreModel;
                    score_only::Bool=false,
                    #linear_space::Bool=score_only
                    )
@@ -57,7 +57,7 @@ function pairalign(::LocalAlignment, a, b, score::AffineGap;
     error("not implemented")
 end
 
-function pairalign(::EditDistance, a, b, cost::AbstractCostModel;
+function pairalign(::EditDistance, a, b, cost::CostModel;
                    distance_only::Bool=false)
     subst_matrix = cost.subst_matrix
     insertion_cost = cost.insertion_cost
@@ -74,12 +74,12 @@ end
 
 function pairalign(::LevenshteinDistance, a, b;
                    distance_only::Bool=false)
-    unit_cost = UnitCostModel{Int}()
-    insertion_cost = 1
-    deletion_cost  = 1
-    cost = CostModel(unit_cost, insertion_cost, deletion_cost)
-    return pairalign(EditDistance(), a, b, cost,
-                     distance_only=distance_only)
+    unitcost = CostModel(
+        UnitSubstitutionCost{Int}(),
+        insertion_cost=1,
+        deletion_cost=1
+    )
+    return pairalign(EditDistance(), a, b, unitcost, distance_only=distance_only)
 end
 
 function pairalign(::HammingDistance, a, b;

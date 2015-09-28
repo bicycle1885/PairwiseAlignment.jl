@@ -1,7 +1,7 @@
 # Gotoh's algorithm (Global)
 # --------------------------
 
-function affinegap_global_align{T}(a, b, subst_matrix::AbstractMatrix{T}, gap_open_penalty::T, gap_extend_penalty::T)
+function affinegap_global_align{T}(a, b, subst_matrix::AbstractSubstitutionMatrix{T}, gap_open_penalty::T, gap_extend_penalty::T)
     m = length(a)
     n = length(b)
     go = gap_open_penalty
@@ -44,7 +44,7 @@ function affinegap_global_align{T}(a, b, subst_matrix::AbstractMatrix{T}, gap_op
     return H, E, F
 end
 
-function traceback{T}(a, b, H, E, F, subst_matrix::AbstractMatrix{T}, gap_open_penalty::T, gap_extend_penalty::T)
+function traceback(a, b, H, E, F, subst_matrix, gap_open_penalty, gap_extend_penalty)
     ge = gap_extend_penalty
     goe = gap_open_penalty + ge
     a′ = Char[]
