@@ -13,11 +13,12 @@ abstract AbstractSubstitutionMatrix{T<:Real}
 """
 Substitution matrix.
 """
-type SubstitutionMatrix{T}
+type SubstitutionMatrix{T} <: AbstractSubstitutionMatrix{T}
     subst_matrix::Matrix{T}
 end
 
 Base.getindex(m::SubstitutionMatrix, x, y) = m.subst_matrix[convert(UInt8, x)+1,convert(UInt8, y)+1]
+Base.setindex!(m::SubstitutionMatrix, v, x, y) = m.subst_matrix[convert(UInt8, x)+1,convert(UInt8, y)+1] = v
 
 
 # Score Models
@@ -47,8 +48,13 @@ type AffineGapScoreModel{T} <: AbstractScoreModel{T}
     gap_extend_penalty::T
 end
 
+function AffineGapScoreModel{T}(subst_matrix::AbstractSubstitutionMatrix{T},
+                                gap_open_penalty, gap_extend_penalty)
+    return AffineGapScoreModel{T}(subst_matrix, T(gap_open_penalty), T(gap_extend_penalty))
+end
+
 function AffineGapScoreModel{T}(subst_matrix::AbstractSubstitutionMatrix{T};
-                           gap_open_penalty=nothing, gap_extend_penalty=nothing)
+                                gap_open_penalty=nothing, gap_extend_penalty=nothing)
     if gap_open_penalty === nothing || gap_extend_penalty === nothing
         error("both gap_open_penalty and gap_extend_penalty should be set")
     end
@@ -56,7 +62,7 @@ function AffineGapScoreModel{T}(subst_matrix::AbstractSubstitutionMatrix{T};
 end
 
 function AffineGapScoreModel{T}(subst_matrix::AbstractMatrix{T};
-                           gap_open_penalty=nothing, gap_extend_penalty=nothing)
+                                gap_open_penalty=nothing, gap_extend_penalty=nothing)
     if gap_open_penalty === nothing || gap_extend_penalty === nothing
         error("both gap_open_penalty and gap_extend_penalty should be set")
     end
@@ -90,6 +96,11 @@ type CostModel{T} <: AbstractCostModel{T}
     subst_matrix::AbstractSubstitutionMatrix{T}
     insertion_cost::T
     deletion_cost::T
+end
+
+function CostModel{T}(subst_matrix::AbstractSubstitutionMatrix{T},
+                      insertion_cost, deletion_cost)
+    return CostModel{T}(subst_matrix, insertion_cost, deletion_cost)
 end
 
 function CostModel{T}(subst_matrix::AbstractSubstitutionMatrix{T};
