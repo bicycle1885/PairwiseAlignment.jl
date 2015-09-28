@@ -3,8 +3,9 @@
 
 function pairalign(::GlobalAlignment, a, b, score::AffineGap;
                    score_only::Bool=false,
+                   banded::Bool=false, lower::Int=0, upper::Int=0,
                    #linear_space::Bool=score_only,
-                   banded::Bool=false, lower::Int=0, upper::Int=0)
+                   )
     subst_matrix = score.subst_matrix
     gap_open_penalty = score.gap_open_penalty
     gap_extend_penalty = score.gap_extend_penalty

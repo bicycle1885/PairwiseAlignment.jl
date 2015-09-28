@@ -9,8 +9,8 @@ abstract AbstractCostModel{T}
 
 immutable CostModel{T} <: AbstractCostModel{T}
     subst_matrix::AbstractSubstitutionMatrix{T}
-    insertion::T
-    deletion::T
+    insertion_cost::T
+    deletion_cost::T
 end
 
 function CostModel(subst_matrix; insertion_cost=nothing, deletion_cost=nothing)
