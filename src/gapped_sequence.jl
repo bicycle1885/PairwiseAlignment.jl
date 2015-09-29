@@ -1,7 +1,7 @@
 # Gapped Sequence
 # ---------------
 
-immutable GappedSequence{S}
+type GappedSequence{S}
     seq::S
     startpos::Int
     len::Int
@@ -12,6 +12,10 @@ immutable GappedSequence{S}
         len = sum(counts)
         return new(seq, startpos, len, counts)
     end
+end
+
+function GappedSequence{S}(seq::S, startpos::Integer)
+    return GappedSequence{S}(seq, startpos, [0, 0])
 end
 
 function GappedSequence{S}(seq::S, counts::Vector)
@@ -26,6 +30,52 @@ end
 Base.convert{S}(::Type{GappedSequence}, seq::S) = GappedSequence(seq, [length(seq), 0])
 
 Base.length(gseq::GappedSequence) = gseq.len
+
+function counts(gseq::GappedSequence)
+    return copy(gseq.counts)
+end
+
+function reversed_counts(gseq::GappedSequence)
+    counts = copy(gseq.counts)
+    # char/gap counts => gap/char counts
+    reverse!(counts)
+    if counts[1] == 0
+        shift!(counts)
+    else
+        unshift!(counts, 0)
+    end
+    if counts[end] == 0
+        pop!(counts)
+    else
+        push!(counts, 0)
+    end
+    return counts
+end
+
+function push_chars!(gseq::GappedSequence, n_chars::Integer)
+    if gseq.counts[end] == 0
+        gseq.counts[end-1] += n_chars
+    else
+        push!(gseq.counts, n_chars, 0)
+    end
+    gseq.len += n_chars
+    return gseq
+end
+
+function push_gaps!(gseq::GappedSequence, n_gaps::Integer)
+    gseq.counts[end] += n_gaps
+    gseq.len += n_gaps
+    return gseq
+end
+
+function Base.append!(gseq::GappedSequence, counts::Vector)
+    @assert rem(length(counts), 2) == 0
+    d = sum(counts)
+    # TODO: check boundaries
+    append!(gseq.counts, counts)
+    gseq.len += sum(counts)
+    return gseq
+end
 
 const GapChar = '-'
 

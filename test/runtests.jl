@@ -7,10 +7,25 @@ let
     @test isa(gseq, GappedSequence{ASCIIString})
     @test length(gseq) == 4
 
+    gseq = GappedSequence(seq, 2)
+    @test length(gseq) == 0
+    @test string(gseq) == ""
+    push_chars!(gseq, 1)
+    @test length(gseq) == 1
+    @test string(gseq) == "C"
+    push_gaps!(gseq, 1)
+    @test length(gseq) == 2
+    @test string(gseq) == "C-"
+
     counts = [2, 2, 2, 0]
     gseq = GappedSequence(seq, counts)
     @test length(gseq) == 6
     @test string(gseq) == "AC--GT"
+
+    counts = [2, 2]
+    gseq = GappedSequence(seq, counts)
+    @test length(gseq) == 4
+    @test string(gseq) == "AC--"
 
     counts = [0, 2, 2, 2, 2, 2]
     gseq = GappedSequence(seq, counts)
@@ -21,6 +36,17 @@ let
     gseq = GappedSequence(seq, 3, counts)
     @test length(gseq) == 4
     @test string(gseq) == "G-T-"
+
+    counts = [2, 0]
+    gseq = GappedSequence(seq, counts)
+    @test length(gseq) == 2
+    @test string(gseq) == "AC"
+    push_chars!(gseq, 1)
+    @test length(gseq) == 3
+    @test string(gseq) == "ACG"
+    append!(gseq, [1, 2])
+    @test length(gseq) == 6
+    @test string(gseq) == "ACGT--"
 end
 
 let

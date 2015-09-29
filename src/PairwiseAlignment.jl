@@ -4,6 +4,7 @@ export
     pairalign,
     # types
     GappedSequence,
+    AlignmentResult,
     # scoring systems
     AbstractSubstitutionMatrix,
     SubstitutionMatrix,
@@ -16,7 +17,12 @@ export
     # distances
     EditDistance,
     HammingDistance,
-    LevenshteinDistance
+    LevenshteinDistance,
+    # operations
+    counts,
+    reversed_counts,
+    push_chars!,
+    push_gaps!
 
 
 # alignment types
