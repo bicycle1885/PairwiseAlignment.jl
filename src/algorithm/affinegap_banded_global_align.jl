@@ -27,6 +27,8 @@ function affinegap_banded_global_align{T}(a, b, L::Int, U::Int, subst_matrix::Ab
         for i in 1:L
             H[i-0+U+1,0+1] = -(go + ge * i)
         end
+        # add gap_extend_penalty to avoid overflow for integers
+        minimum = typemin(T) + ge
         for j in 1:n
             if j ≤ U
                 H[0-j+U+1,j+1] = -(go + ge * j)
@@ -35,20 +37,18 @@ function affinegap_banded_global_align{T}(a, b, L::Int, U::Int, subst_matrix::Ab
             lo = max(1, j - U)
             hi = min(m, j + L)
             for i in lo:hi
-                if j == 1 || i == j + L
-                    # add gap_extend_penalty to avoid overflow
-                    E[i-j+U+1,j] = typemin(T) + ge
+                E[i-j+U+1,j] = if j == 1 || i == j + L
+                    minimum
                 else
-                    E[i-j+U+1,j] = max(
+                    max(
                         H[i-(j-1)+U+1,(j-1)+1] - goe,
                         E[i-(j-1)+U+1,(j-1)  ] - ge
                     )
                 end
-                if i == 1 || j == i + U
-                    # add gap_extend_penalty to avoid overflow
-                    F[i-j+U+1,j] = typemin(T) + ge
+                F[i-j+U+1,j] = if i == 1 || j == i + U
+                    minimum
                 else
-                    F[i-j+U+1,j] = max(
+                    max(
                         H[(i-1)-j+U+1,j+1] - goe,
                         F[(i-1)-j+U+1,j  ] - ge
                     )

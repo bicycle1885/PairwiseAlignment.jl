@@ -14,23 +14,23 @@ function affinegap_global_align{T}(a, b, subst_matrix::AbstractSubstitutionMatri
     @inbounds begin
         H[1,1] = T(0)
         for i in 1:m
-            H[i+1,1] = -go - ge * i
+            H[i+1,1] = -(go + ge * i)
         end
         for j in 1:n
-            H[1,j+1] = -go - ge * j
+            H[1,j+1] = -(go + ge * j)
             for i in 1:m
-                if j == 1
-                    E[i,j] = H[i+1,j] - goe
+                E[i,j] = if j == 1
+                    H[i+1,j] - goe
                 else
-                    E[i,j] = max(
+                    max(
                         E[i,j-1] - ge,
                         H[i+1,j] - goe
                     )
                 end
-                if i == 1
-                    F[i,j] = H[i,j+1] - goe
+                F[i,j] = if i == 1
+                    H[i,j+1] - goe
                 else
-                    F[i,j] = max(
+                    max(
                         F[i-1,j] - ge,
                         H[i,j+1] - goe
                     )
