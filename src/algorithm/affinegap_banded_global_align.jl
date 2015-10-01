@@ -25,14 +25,12 @@ function affinegap_banded_global_align{T}(a, b, L::Int, U::Int, subst_matrix::Ab
     @inbounds begin
         H[0-0+U+1,0+1] = T(0)
         for i in 1:L
-            #H[i-0+U+1,0+1] = -(go + ge * i)
             H[i-0+U+1,0+1] = affinegap_score(i, go, ge)
         end
         # add gap_extend_penalty to avoid overflow for integers
         minimum = typemin(T) + ge
         for j in 1:n
             if j ≤ U
-                #H[0-j+U+1,j+1] = -(go + ge * j)
                 H[0-j+U+1,j+1] = affinegap_score(j, go, ge)
             end
             # vertical bounds along the j-th column
@@ -77,40 +75,51 @@ function traceback(a, b, H, E, F, L, U, subst_matrix, gap_open_penalty, gap_exte
     # gap/character counts (reversed order)
     counts_a = [0, 0]
     counts_b = [0, 0]
+    # if gap extension is selected in the previous traceback step, either
+    # gap extension or gap open in that direction should be selected.
+    gapext_a = false
+    gapext_b = false
     i = m
     j = n
-    while i ≥ 1 || j ≥ 1
-        if i ≥ 1 && j ≥ 1 && H[i-j+U+1,j+1] == H[(i-1)-(j-1)+U+1,(j-1)+1] + subst_matrix[a[i],b[j]]
-            # ↖
-            # ...a[i]...
-            #    |
-            # ...b[j]...
-            gap_a = false
-            gap_b = false
-            i -= 1
-            j -= 1
-        elseif i == 0 || (j ≥ 1 && H[i-j+U+1,j+1] == E[i-j+U+1,j] && (j > i - L && (E[i-j+U+1,j] == E[i-(j-1)+U+1,j-1] - ge || E[i-j+U+1,j] == H[i-(j-1)+U+1,(j-1)+1] - goe)))
-            # ←
-            # ... -    ...
-            #     |
-            # ... b[j] ...
-            gap_a = true
-            gap_b = false
-            j -= 1
-        elseif j == 0 || (i ≥ 1 && H[i-j+U+1,j+1] == F[i-j+U+1,j] && (j < i + U && (F[i-j+U+1,j] == F[(i-1)-j+U+1,j] - ge || F[i-j+U+1,j] == H[(i-1)-j+U+1,j+1] - goe)))
-            # ↑
-            # ... a[i] ...
-            #     |
-            # ... -    ...
-            gap_a = false
-            gap_b = true
-            i -= 1
-        else
-            @assert false
+    while i ≥ 1 && j ≥ 1
+        @assert !(gapext_a && gapext_b)
+        if gapext_a
+            @assert H[i-j+U+1,j+1] == E[i-j+U+1,j]
+            if j ≥ 2 && E[i-j+U+1,j] == E[i-(j-1)+U+1,j-1] - ge
+                @gapext a
+            elseif E[i-j+U+1,j] == H[(i+1)-j+U+1,j] - goe
+                @gapopen a
+            end
+        elseif gapext_b
+            @assert H[i-j+U+1,j+1] == F[i-j+U+1,j]
+            if i ≥ 2 && F[i-j+U+1,j] == F[(i-1)-j+U+1,j] - ge
+                @gapext b
+            elseif F[i-j+U+1,j] == H[(i-1)-j+U+1,j+1] - goe
+                @gapopen b
+            end
+        elseif H[i-j+U+1,j+1] == H[(i-1)-(j-1)+U+1,(j-1)+1] + subst_matrix[a[i],b[j]]
+            @match
+        elseif H[i-j+U+1,j+1] == E[i-j+U+1,j] && j > i - L
+            if E[i-j+U+1,j] == E[i-(j-1)+U+1,j-1] - ge
+                @gapext a
+            elseif E[i-j+U+1,j] == H[i-(j-1)+U+1,(j-1)+1] - goe
+                @gapopen a
+            end
+        elseif H[i-j+U+1,j+1] == F[i-j+U+1,j] && j < i + U
+            if F[i-j+U+1,j] == F[(i-1)-j+U+1,j] - ge
+                @gapext b
+            elseif F[i-j+U+1,j] == H[(i-1)-j+U+1,j+1] - goe
+                @gapopen b
+            end
         end
-        # update counts
-        update_counts!(counts_a, gap_a)
-        update_counts!(counts_b, gap_b)
+        # do not come here
+        @assert false
+    end
+    while j ≥ 1
+        @gap a
+    end
+    while i ≥ 1
+        @gap b
     end
     reverse!(counts_a)
     reverse!(counts_b)

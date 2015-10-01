@@ -242,6 +242,14 @@ let
     aln2 = pairalign(GlobalAlignment(), b, a, affine_gap, banded=true, lower=2, upper=2)
     @test aln1.score == aln2.score == -9
 
+    a = "GC   T" |> rmspaces
+    b = "GCACGT"
+    aln1 = pairalign(GlobalAlignment(), a, b, affine_gap, banded=true, lower=3, upper=3)
+    aln2 = pairalign(GlobalAlignment(), b, a, affine_gap, banded=true, lower=3, upper=3)
+    @test aln1.score == aln2.score == -11
+    @test string(aln1[1]) == "GC---T"
+    @test string(aln1[2]) == "GCACGT"
+
     a = "TATGGCCCG TAG   TTT" |> rmspaces
     b = "TA    CCGATAGGGGTTA" |> rmspaces
     aln1_1 = pairalign(GlobalAlignment(), a, b, affine_gap, banded=true, lower=1, upper=1)
