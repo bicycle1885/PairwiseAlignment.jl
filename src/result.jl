@@ -31,7 +31,7 @@ end
 
 function Base.getindex(aln::AlignmentResult, i::Integer)
     if isnull(aln.seqpair)
-        error("alignment is undefined")
+        error("alignment is not available")
     end
     pair = get(aln.seqpair)
     if i == 1
