@@ -3,7 +3,6 @@ module PairwiseAlignment
 export
     pairalign,
     # types
-    GappedSequence,
     AlignmentResult,
     # scoring systems
     AbstractSubstitutionMatrix,
@@ -19,7 +18,8 @@ export
     EditDistance,
     HammingDistance,
     LevenshteinDistance,
-    # operations
+    # gapped sequence
+    GappedSequence,
     leading_chars,
     leading_gaps,
     trailing_chars,
@@ -27,7 +27,8 @@ export
     counts,
     reversed_counts,
     push_chars!,
-    push_gaps!
+    push_gaps!,
+    gapmap
 
 
 # alignment types

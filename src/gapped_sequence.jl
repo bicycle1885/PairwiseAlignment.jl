@@ -87,18 +87,34 @@ function Base.append!(gseq::GappedSequence, counts::Vector)
     return gseq
 end
 
+function gapmap(gseq::GappedSequence)
+    gmap = falses(length(gseq))
+    i = gseq.startpos
+    j = 0
+    for k in 1:div(length(gseq.counts), 2)
+        count = gseq.counts[2k-1]
+        j += count
+        count = gseq.counts[2k]
+        while count > 0
+            gmap[j+=1] = true
+            count -= 1
+        end
+    end
+    return gmap
+end
+
 const GapChar = '-'
 
 function Base.show(io::IO, gseq::GappedSequence)
     i = gseq.startpos
-    for j in 1:div(length(gseq.counts), 2)
-        count = gseq.counts[2j-1]
+    for k in 1:div(length(gseq.counts), 2)
+        count = gseq.counts[2k-1]
         while count > 0
             print(io, convert(Char, gseq.seq[i]))
             i += 1
             count -= 1
         end
-        count = gseq.counts[2j]
+        count = gseq.counts[2k]
         while count > 0
             print(io, GapChar)
             count -= 1

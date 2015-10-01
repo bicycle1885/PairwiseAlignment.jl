@@ -44,9 +44,11 @@ end
 
 function matching_string(a, b)
     @assert length(a) == length(b)
+    gmap_a = gapmap(a)
+    gmap_b = gapmap(b)
     str = Char[]
     for i in 1:length(a)
-        if a[i] == b[i] && !(a[i] == GapChar || b[i] == GapChar)
+        if a[i] == b[i] && !gmap_a[i] && !gmap_b[i]
             push!(str, '|')
         else
             push!(str, ' ')
