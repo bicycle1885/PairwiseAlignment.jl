@@ -19,6 +19,10 @@ export
     HammingDistance,
     LevenshteinDistance,
     # operations
+    leading_chars,
+    leading_gaps,
+    trailing_chars,
+    trailing_gaps,
     counts,
     reversed_counts,
     push_chars!,

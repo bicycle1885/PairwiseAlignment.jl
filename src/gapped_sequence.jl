@@ -31,6 +31,16 @@ Base.convert{S}(::Type{GappedSequence}, seq::S) = GappedSequence(seq, [length(se
 
 Base.length(gseq::GappedSequence) = gseq.len
 
+# count the number of chars/gaps
+leading_chars(gseq::GappedSequence) = gseq.counts[1]
+function leading_gaps(gseq::GappedSequence)
+    return leading_chars(gseq) > 0 ? 0 : gseq.counts[2]
+end
+trailing_gaps(gseq::GappedSequence) = gseq.counts[end]
+function trailing_chars(gseq::GappedSequence)
+    return trailing_gaps(gseq) > 0 ? 0 : gseq.counts[end-1]
+end
+
 function counts(gseq::GappedSequence)
     return copy(gseq.counts)
 end
@@ -73,7 +83,7 @@ function Base.append!(gseq::GappedSequence, counts::Vector)
     d = sum(counts)
     # TODO: check boundaries
     append!(gseq.counts, counts)
-    gseq.len += sum(counts)
+    gseq.len += d
     return gseq
 end
 

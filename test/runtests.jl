@@ -10,27 +10,46 @@ let
     gseq = GappedSequence(seq, 2)
     @test length(gseq) == 0
     @test string(gseq) == ""
+    @test leading_chars(gseq) == leading_gaps(gseq) == 0
+    @test trailing_chars(gseq) == trailing_gaps(gseq) == 0
     push_chars!(gseq, 1)
     @test length(gseq) == 1
     @test string(gseq) == "C"
+    @test leading_chars(gseq) == trailing_chars(gseq) == 1
+    @test leading_gaps(gseq) == trailing_gaps(gseq) == 0
     push_gaps!(gseq, 1)
     @test length(gseq) == 2
     @test string(gseq) == "C-"
+    @test leading_chars(gseq) == 1
+    @test leading_gaps(gseq) == 0
+    @test trailing_chars(gseq) == 0
+    @test trailing_gaps(gseq) == 1
 
     counts = [2, 2, 2, 0]
     gseq = GappedSequence(seq, counts)
     @test length(gseq) == 6
     @test string(gseq) == "AC--GT"
+    @test leading_chars(gseq) == trailing_chars(gseq) == 2
+    @test leading_gaps(gseq) == trailing_gaps(gseq) == 0
+    @test PairwiseAlignment.counts(gseq) == counts
 
     counts = [2, 2]
     gseq = GappedSequence(seq, counts)
     @test length(gseq) == 4
     @test string(gseq) == "AC--"
+    @test leading_chars(gseq) == 2
+    @test leading_gaps(gseq) == 0
+    @test trailing_chars(gseq) == 0
+    @test trailing_gaps(gseq) == 2
+    @test PairwiseAlignment.counts(gseq) == counts
 
     counts = [0, 2, 2, 2, 2, 2]
     gseq = GappedSequence(seq, counts)
     @test length(gseq) == 10
     @test string(gseq) == "--AC--GT--"
+    @test leading_chars(gseq) == trailing_chars(gseq) == 0
+    @test leading_gaps(gseq) == leading_gaps(gseq) == 2
+    @test PairwiseAlignment.counts(gseq) == counts
 
     counts = [1, 1, 1, 1]
     gseq = GappedSequence(seq, 3, counts)
