@@ -25,13 +25,15 @@ function affinegap_banded_global_align{T}(a, b, L::Int, U::Int, subst_matrix::Ab
     @inbounds begin
         H[0-0+U+1,0+1] = T(0)
         for i in 1:L
-            H[i-0+U+1,0+1] = -(go + ge * i)
+            #H[i-0+U+1,0+1] = -(go + ge * i)
+            H[i-0+U+1,0+1] = affinegap_score(i, go, ge)
         end
         # add gap_extend_penalty to avoid overflow for integers
         minimum = typemin(T) + ge
         for j in 1:n
             if j ≤ U
-                H[0-j+U+1,j+1] = -(go + ge * j)
+                #H[0-j+U+1,j+1] = -(go + ge * j)
+                H[0-j+U+1,j+1] = affinegap_score(j, go, ge)
             end
             # vertical bounds along the j-th column
             lo = max(1, j - U)
@@ -117,16 +119,4 @@ end
 
 function isinband(i, j, L, U, a, b)
     return 0 ≤ i ≤ length(a) && 0 ≤ j ≤ length(b) && i - L ≤ j ≤ i + U
-end
-
-function update_counts!(counts, isgap)
-    if isgap
-        if counts[end] > 0
-            push!(counts, 0, 0)
-        end
-        counts[end-1] += 1
-    else
-        counts[end] += 1
-    end
-    return counts
 end

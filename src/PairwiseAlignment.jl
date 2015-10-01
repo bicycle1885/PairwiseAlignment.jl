@@ -14,6 +14,7 @@ export
     # alignment types
     GlobalAlignment,
     LocalAlignment,
+    SemiGlobalAlignment,
     # distances
     EditDistance,
     HammingDistance,
@@ -47,8 +48,10 @@ include("gapped_sequence.jl")
 include("model.jl")
 include("result.jl")
 include("pairalign.jl")
+include("algorithm/common.jl")
 include("algorithm/affinegap_global_align.jl")
 include("algorithm/affinegap_local_align.jl")
+include("algorithm/affinegap_semiglobal_align.jl")
 include("algorithm/affinegap_banded_global_align.jl")
 include("algorithm/edit_distance.jl")
 include("algorithm/hamming_distance.jl")

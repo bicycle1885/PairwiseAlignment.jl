@@ -1,7 +1,8 @@
-# Gotoh's algorithm (Global)
-# --------------------------
+# Gotoh's algorithm (Semi-global)
+# -------------------------------
 
-function affinegap_global_align{T}(a, b, subst_matrix::AbstractSubstitutionMatrix{T}, gap_open_penalty::T, gap_extend_penalty::T)
+# global-local alignment
+function affinegap_semiglobal_align{T}(a, b, subst_matrix::AbstractSubstitutionMatrix{T}, gap_open_penalty::T, gap_extend_penalty::T)
     m = length(a)
     n = length(b)
     go = gap_open_penalty
@@ -16,8 +17,10 @@ function affinegap_global_align{T}(a, b, subst_matrix::AbstractSubstitutionMatri
         for i in 1:m
             H[i+1,1] = affinegap_score(i, go, ge)
         end
+        best_score = H[m+1,1]
+        best_score_column = 0
         for j in 1:n
-            H[1,j+1] = affinegap_score(j, go, ge)
+            H[1,j+1] = T(0)
             for i in 1:m
                 E[i,j] = if j == 1
                     H[i+1,j] - goe
@@ -41,12 +44,17 @@ function affinegap_global_align{T}(a, b, subst_matrix::AbstractSubstitutionMatri
                     H[i,j] + subst_matrix[a[i],b[j]]
                 )
             end
+            if H[m+1,j+1] > best_score
+                best_score = H[m+1,j+1]
+                best_score_column = j
+            end
         end
     end
-    return H, E, F
+    return H, E, F, (m, best_score_column)
 end
 
-function traceback(a, b, H, E, F, subst_matrix, gap_open_penalty, gap_extend_penalty)
+
+function semiglobal_traceback(a, b, H, E, F, best_endpos, subst_matrix, gap_open_penalty, gap_extend_penalty)
     ge = gap_extend_penalty
     goe = gap_open_penalty + ge
     # gap/character counts (reversed order)
@@ -56,9 +64,8 @@ function traceback(a, b, H, E, F, subst_matrix, gap_open_penalty, gap_extend_pen
     # gap extension or gap open in that direction should be selected.
     gapext_a = false
     gapext_b = false
-    i = length(a)
-    j = length(b)
-    while i ≥ 1 && j ≥ 1
+    i, j = best_endpos
+    while i ≥ 1
         @assert !(gapext_a && gapext_b)
         if gapext_a
             @assert H[i+1,j+1] == E[i,j]
@@ -94,13 +101,7 @@ function traceback(a, b, H, E, F, subst_matrix, gap_open_penalty, gap_extend_pen
         # do not come here
         @assert false
     end
-    while j ≥ 1
-        @gap a
-    end
-    while i ≥ 1
-        @gap b
-    end
     reverse!(counts_a)
     reverse!(counts_b)
-    return GappedSequence(a, counts_a), GappedSequence(b, counts_b)
+    return GappedSequence(a, 1, counts_a), GappedSequence(b, j + 1, counts_b)
 end

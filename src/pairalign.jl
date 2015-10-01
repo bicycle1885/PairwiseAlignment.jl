@@ -57,6 +57,25 @@ function pairalign{S1,S2}(::LocalAlignment, a::S1, b::S2, score::AffineGapScoreM
     error("not implemented")
 end
 
+function pairalign{S1,S2}(::SemiGlobalAlignment, a::S1, b::S2, score::AffineGapScoreModel;
+                          score_only::Bool=false)
+    subst_matrix = score.subst_matrix
+    gap_open_penalty = score.gap_open_penalty
+    gap_extend_penalty = score.gap_extend_penalty
+    if length(a) > length(b)
+        error("the first sequence should be shorter or equal to the second sequence")
+    end
+    if score_only
+        H, _, _, best_endpos = affinegap_semiglobal_align(a, b, subst_matrix, gap_open_penalty, gap_extend_penalty)
+        return AlignmentResult(S1, S2, H[best_endpos[1]+1,best_endpos[2]+1])
+    else
+        H, E, F, best_endpos = affinegap_semiglobal_align(a, b, subst_matrix, gap_open_penalty, gap_extend_penalty)
+        a′, b′ = semiglobal_traceback(a, b, H, E, F, best_endpos, subst_matrix, gap_open_penalty, gap_extend_penalty)
+        return AlignmentResult(H[best_endpos[1]+1,best_endpos[2]+1], a′, b′)
+    end
+    error("not implemented")
+end
+
 function pairalign{S1,S2}(::EditDistance, a::S1, b::S2, cost::CostModel;
                           distance_only::Bool=false)
     subst_matrix = cost.subst_matrix

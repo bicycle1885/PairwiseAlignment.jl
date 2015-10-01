@@ -158,6 +158,14 @@ let
     aln2 = pairalign(GlobalAlignment(), b, a, affine_gap)
     @test aln1.score == aln2.score == -9
 
+    a = "GC   T" |> rmspaces
+    b = "GCACGT"
+    aln1 = pairalign(GlobalAlignment(), a, b, affine_gap)
+    aln2 = pairalign(GlobalAlignment(), b, a, affine_gap)
+    @test aln1.score == aln2.score == -11
+    @test string(aln1[1]) == "GC---T"
+    @test string(aln1[2]) == "GCACGT"
+
     a = "CGTATCCAACGG     TTGTGGGA " |> rmspaces
     #     ||||| || ||      |||| ||
     b = " GTATCAAATGGACCCACTGTGTGAG" |> rmspaces
@@ -325,6 +333,32 @@ let
     b = "AGATACGTAGGGAGA"
     aln = pairalign(LocalAlignment(), a, b, affine_gap)
     @test aln.score == 3 * 6 - (2 + 1 + 1)
+end
+
+let
+    # Semi-global Alignment
+    affinegap = AffineGapScoreModel(
+        SimpleSubstMatrix(0, -6),
+        gap_open_penalty=5,
+        gap_extend_penalty=2
+    )
+
+    a = "A"
+    b = "A"
+    aln = pairalign(SemiGlobalAlignment(), a, b, affinegap)
+    @test aln.score == 0
+
+    a =        "ACGT"
+    b = "GATHAGCACGTAGTA"
+    aln = pairalign(SemiGlobalAlignment(), a, b, affinegap)
+    @test aln.score == 0
+
+    a =   "TTAGC   TAGT" |> rmspaces
+    b = "GATTAGCACGTAGTA"
+    aln = pairalign(SemiGlobalAlignment(), a, b, affinegap)
+    @test string(aln[1]) == "TTAGC---TAGT"
+    @test string(aln[2]) == "TTAGCACGTAGT"
+    @test aln.score == -11
 end
 
 let
