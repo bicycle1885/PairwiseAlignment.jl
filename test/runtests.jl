@@ -332,6 +332,13 @@ let
     aln = pairalign(LocalAlignment(), a, b, affine_gap)
     @test aln.score == 6
 
+    a =   "TTAGC   TAGT" |> rmspaces
+    b = "GATTAGCACGTAGTA"
+    aln = pairalign(LocalAlignment(), a, b, affine_gap)
+    @test string(aln[1]) == "TTAGC---TAGT"
+    @test string(aln[2]) == "TTAGCACGTAGT"
+    @test aln.score == 3 * 5 + (-2 + -1 * 3) + 3 * 4
+
     # partial approximate matching
     a =     "ACGTAG"
     b = "AGATACGTAGGGAGA"

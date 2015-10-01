@@ -58,32 +58,49 @@ function traceback(a, b, H, E, F, best_endpos, subst_matrix, gap_open_penalty, g
     # gap/character counts (reversed order)
     counts_a = [0, 0]
     counts_b = [0, 0]
+    # if gap extension is selected in the previous traceback step, either
+    # gap extension or gap open in that direction should be selected.
+    gapext_a = false
+    gapext_b = false
     i, j = best_endpos
     while H[i,j] > 0
-        if i ≥ 1 && j ≥ 1 && H[i+1,j+1] == H[i,j] + subst_matrix[a[i],b[j]]
-            # ↖
-            gap_a = false
-            gap_b = false
-            i -= 1
-            j -= 1
-        elseif i == 0 || (j ≥ 1 && H[i+1,j+1] == E[i,j] && ((j ≥ 2 && E[i,j] == E[i,j-1] - ge) || E[i,j] == H[i+1,j] - goe))
-            # ←
-            gap_a = true
-            gap_b = false
-            j -= 1
-        elseif j == 0 || (i ≥ 1 && H[i+1,j+1] == F[i,j] && ((i ≥ 2 && F[i,j] == F[i-1,j] - ge) || F[i,j] == H[i,j+1] - goe))
-            # ↑
-            gap_a = false
-            gap_b = true
-            i -= 1
-        else
-            @assert false
+        @assert !(gapext_a && gapext_b)
+        if gapext_a
+            @assert H[i+1,j+1] == E[i,j]
+            if j ≥ 2 && E[i,j] == E[i,j-1] - ge
+                @gapext a
+            elseif E[i,j] == H[i+1,j] - goe
+                @gapopen a
+            end
+        elseif gapext_b
+            @assert H[i+1,j+1] == F[i,j]
+            if i ≥ 2 && F[i,j] == F[i-1,j] - ge
+                @gapext b
+            elseif F[i,j] == H[i,j+1] - goe
+                @gapopen b
+            end
+        elseif H[i+1,j+1] == H[i,j] + subst_matrix[a[i],b[j]]
+            @match
+        elseif H[i+1,j+1] == E[i,j]
+            # gap in a
+            if j ≥ 2 && E[i,j] == E[i,j-1] - ge
+                @gapext a
+            elseif E[i,j] == H[i+1,j] - goe
+                @gapopen a
+            end
+        elseif H[i+1,j+1] == F[i,j]
+            # gap in b
+            if i ≥ 2 && F[i,j] == F[i-1,j] - ge
+                @gapext b
+            elseif F[i,j] == H[i,j+1] - goe
+                @gapopen b
+            end
         end
-        # update counts
-        update_counts!(counts_a, gap_a)
-        update_counts!(counts_b, gap_b)
+        # do not come here
+        @assert false
     end
     # update counts
+    @assert a[i] == b[j]
     update_counts!(counts_a, false)
     update_counts!(counts_b, false)
     reverse!(counts_a)
