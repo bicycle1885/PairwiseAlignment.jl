@@ -103,9 +103,7 @@ function gapmap(gseq::GappedSequence)
     return gmap
 end
 
-const GapChar = '-'
-
-function Base.show(io::IO, gseq::GappedSequence)
+function Base.show(io::IO, gseq::GappedSequence, gapchar::Char='-')
     i = gseq.startpos
     for k in 1:div(length(gseq.counts), 2)
         count = gseq.counts[2k-1]
@@ -116,7 +114,7 @@ function Base.show(io::IO, gseq::GappedSequence)
         end
         count = gseq.counts[2k]
         while count > 0
-            print(io, GapChar)
+            print(io, gapchar)
             count -= 1
         end
     end
