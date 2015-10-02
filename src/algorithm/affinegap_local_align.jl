@@ -66,14 +66,12 @@ function traceback(a, b, H, E, F, best_endpos, subst_matrix, gap_open_penalty, g
     while H[i,j] > 0
         @assert !(gapext_a && gapext_b)
         if gapext_a
-            @assert H[i+1,j+1] == E[i,j]
             if j ≥ 2 && E[i,j] == E[i,j-1] - ge
                 @gapext a
             elseif E[i,j] == H[i+1,j] - goe
                 @gapopen a
             end
         elseif gapext_b
-            @assert H[i+1,j+1] == F[i,j]
             if i ≥ 2 && F[i,j] == F[i-1,j] - ge
                 @gapext b
             elseif F[i,j] == H[i,j+1] - goe

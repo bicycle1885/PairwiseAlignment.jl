@@ -84,14 +84,12 @@ function traceback(a, b, H, E, F, L, U, subst_matrix, gap_open_penalty, gap_exte
     while i ≥ 1 && j ≥ 1
         @assert !(gapext_a && gapext_b)
         if gapext_a
-            @assert H[i-j+U+1,j+1] == E[i-j+U+1,j]
             if j ≥ 2 && E[i-j+U+1,j] == E[i-(j-1)+U+1,j-1] - ge
                 @gapext a
             elseif E[i-j+U+1,j] == H[(i+1)-j+U+1,j] - goe
                 @gapopen a
             end
         elseif gapext_b
-            @assert H[i-j+U+1,j+1] == F[i-j+U+1,j]
             if i ≥ 2 && F[i-j+U+1,j] == F[(i-1)-j+U+1,j] - ge
                 @gapext b
             elseif F[i-j+U+1,j] == H[(i-1)-j+U+1,j+1] - goe
