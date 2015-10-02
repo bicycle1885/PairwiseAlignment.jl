@@ -5,12 +5,19 @@ type GappedSequence{S}
     seq::S
     startpos::Int
     len::Int
+    nchars::Int
     counts::Vector{Int}  # the alternative number of char and gap counts
     function GappedSequence(seq::S, startpos::Integer, counts::Vector)
         @assert 1 ≤ startpos
         @assert iseven(length(counts))
-        len = sum(counts)
-        return new(seq, startpos, len, counts)
+        len = 0
+        nchars = 0
+        for i in 1:endof(counts)
+            c = counts[i]
+            len += c
+            nchars += ifelse(isodd(i), c, 0)
+        end
+        return new(seq, startpos, len, nchars, counts)
     end
 end
 
@@ -30,6 +37,9 @@ end
 Base.convert{S}(::Type{GappedSequence}, seq::S) = GappedSequence(seq, [length(seq), 0])
 
 Base.length(gseq::GappedSequence) = gseq.len
+
+n_chars(gseq::GappedSequence) = gseq.nchars
+n_gaps(gseq::GappedSequence) = length(gseq) - n_chars(gseq)
 
 # count the number of chars/gaps
 leading_chars(gseq::GappedSequence) = gseq.counts[1]
@@ -69,6 +79,7 @@ function push_chars!(gseq::GappedSequence, n_chars::Integer)
         push!(gseq.counts, n_chars, 0)
     end
     gseq.len += n_chars
+    gseq.nchars += n_chars
     return gseq
 end
 

@@ -20,6 +20,8 @@ export
     LevenshteinDistance,
     # gapped sequence
     GappedSequence,
+    n_chars,
+    n_gaps,
     leading_chars,
     leading_gaps,
     trailing_chars,

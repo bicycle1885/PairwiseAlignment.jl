@@ -32,7 +32,7 @@ function pairalign{S1,S2}(::GlobalAlignment, a::S1, b::S2, score::AffineGapScore
             return AlignmentResult(S1, S2, H[end,end])
         else
             H, E, F = affinegap_global_align(a, b, subst_matrix, gap_open_penalty, gap_extend_penalty)
-            a′, b′ = traceback(a, b, H, E, F, subst_matrix, gap_open_penalty, gap_extend_penalty)
+            a′, b′ = affinegap_global_traceback(a, b, H, E, F, (length(a), length(b)), subst_matrix, gap_open_penalty, gap_extend_penalty)
             return AlignmentResult(H[end,end], a′, b′)
         end
     end

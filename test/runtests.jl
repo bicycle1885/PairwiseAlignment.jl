@@ -10,18 +10,24 @@ let
     gseq = GappedSequence(seq, 2)
     @test length(gseq) == 0
     @test string(gseq) == ""
+    @test n_chars(gseq) == 0
+    @test n_gaps(gseq) == 0
     @test leading_chars(gseq) == leading_gaps(gseq) == 0
     @test trailing_chars(gseq) == trailing_gaps(gseq) == 0
     @test gapmap(gseq) == BitVector([])
     push_chars!(gseq, 1)
     @test length(gseq) == 1
     @test string(gseq) == "C"
+    @test n_chars(gseq) == 1
+    @test n_gaps(gseq) == 0
     @test leading_chars(gseq) == trailing_chars(gseq) == 1
     @test leading_gaps(gseq) == trailing_gaps(gseq) == 0
     @test gapmap(gseq) == BitVector([false])
     push_gaps!(gseq, 1)
     @test length(gseq) == 2
     @test string(gseq) == "C-"
+    @test n_chars(gseq) == 1
+    @test n_gaps(gseq) == 1
     @test leading_chars(gseq) == 1
     @test leading_gaps(gseq) == 0
     @test trailing_chars(gseq) == 0
@@ -41,6 +47,8 @@ let
     gseq = GappedSequence(seq, counts)
     @test length(gseq) == 4
     @test string(gseq) == "AC--"
+    @test n_chars(gseq) == 2
+    @test n_gaps(gseq) == 2
     @test leading_chars(gseq) == 2
     @test leading_gaps(gseq) == 0
     @test trailing_chars(gseq) == 0
@@ -51,6 +59,8 @@ let
     gseq = GappedSequence(seq, counts)
     @test length(gseq) == 10
     @test string(gseq) == "--AC--GT--"
+    @test n_chars(gseq) == 4
+    @test n_gaps(gseq) == 6
     @test leading_chars(gseq) == trailing_chars(gseq) == 0
     @test leading_gaps(gseq) == leading_gaps(gseq) == 2
     @test PairwiseAlignment.counts(gseq) == counts

@@ -46,7 +46,7 @@ function affinegap_global_align{T}(a, b, subst_matrix::AbstractSubstitutionMatri
     return H, E, F
 end
 
-function traceback(a, b, H, E, F, subst_matrix, gap_open_penalty, gap_extend_penalty)
+function affinegap_global_traceback(a, b, H, E, F, endpos, subst_matrix, gap_open_penalty, gap_extend_penalty)
     ge = gap_extend_penalty
     goe = gap_open_penalty + ge
     # gap/character counts (reversed order)
@@ -56,19 +56,16 @@ function traceback(a, b, H, E, F, subst_matrix, gap_open_penalty, gap_extend_pen
     # gap extension or gap open in that direction should be selected.
     gapext_a = false
     gapext_b = false
-    i = length(a)
-    j = length(b)
+    i, j = endpos
     while i ≥ 1 && j ≥ 1
         @assert !(gapext_a && gapext_b)
         if gapext_a
-            @assert H[i+1,j+1] == E[i,j]
             if j ≥ 2 && E[i,j] == E[i,j-1] - ge
                 @gapext a
             elseif E[i,j] == H[i+1,j] - goe
                 @gapopen a
             end
         elseif gapext_b
-            @assert H[i+1,j+1] == F[i,j]
             if i ≥ 2 && F[i,j] == F[i-1,j] - ge
                 @gapext b
             elseif F[i,j] == H[i,j+1] - goe

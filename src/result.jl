@@ -20,8 +20,8 @@ function Base.show(io::IO, aln::AlignmentResult)
     print(io, "Score: ", aln.score)
     if !isnull(aln.seqpair)
         pair = get(aln.seqpair)
-        a′ = string(pair.first)
-        b′ = string(pair.second)
+        a′ = pair.first
+        b′ = pair.second
         print(io, '\n')
         print(io, "  a: ", a′, '\n')
         print(io, "     ", matching_string(a′, b′), '\n')
@@ -44,11 +44,13 @@ end
 
 function matching_string(a, b)
     @assert length(a) == length(b)
+    sa = string(a)
+    sb = string(b)
     gmap_a = gapmap(a)
     gmap_b = gapmap(b)
     str = Char[]
     for i in 1:length(a)
-        if a[i] == b[i] && !gmap_a[i] && !gmap_b[i]
+        if sa[i] == sb[i] && !gmap_a[i] && !gmap_b[i]
             push!(str, '|')
         else
             push!(str, ' ')
