@@ -28,27 +28,19 @@ function traceback(a, b, D, subst_matrix, insertion_cost, deletion_cost)
     counts_b = [0, 0]
     i = length(a)
     j = length(b)
-    while i ≥ 1 || j ≥ 1
-        if i ≥ 1 && j ≥ 1 && D[i+1,j+1] == D[i,j] + subst_matrix[a[i],b[j]]
-            gap_a = false
-            gap_b = false
-            i -= 1
-            j -= 1
-        elseif i == 0 || (j ≥ 1 && D[i+1,j+1] == D[i+1,j] + insertion_cost)
-            gap_a = true
-            gap_b = false
-            j -= 1
-        elseif j == 0 || (i ≥ 1 && D[i+1,j+1] == D[i,j+1] + deletion_cost)
-            gap_a = false
-            gap_b = true
-            i -= 1
-        else
-            @assert false
+    while i ≥ 1 && j ≥ 1
+        if D[i+1,j+1] == D[i,j] + subst_matrix[a[i],b[j]]
+            @match
+        elseif D[i+1,j+1] == D[i+1,j] + insertion_cost
+            @gap a
+        elseif D[i+1,j+1] == D[i,j+1] + deletion_cost
+            @gap b
         end
-        # update counts
-        update_counts!(counts_a, gap_a)
-        update_counts!(counts_b, gap_b)
+        # do not come here
+        @assert false
     end
+    while j ≥ 1 @gap a end
+    while i ≥ 1 @gap b end
     reverse!(counts_a)
     reverse!(counts_b)
     return GappedSequence(a, counts_a), GappedSequence(b, counts_b)

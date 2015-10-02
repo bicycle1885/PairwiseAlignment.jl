@@ -115,12 +115,8 @@ function traceback(a, b, H, E, F, L, U, subst_matrix, gap_open_penalty, gap_exte
         # do not come here
         @assert false
     end
-    while j ≥ 1
-        @gap a
-    end
-    while i ≥ 1
-        @gap b
-    end
+    while j ≥ 1 @gap a end
+    while i ≥ 1 @gap b end
     reverse!(counts_a)
     reverse!(counts_b)
     return GappedSequence(a, counts_a), GappedSequence(b, counts_b)
