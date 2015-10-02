@@ -52,7 +52,7 @@ function affinegap_local_align{T}(a, b, subst_matrix::AbstractSubstitutionMatrix
     return H, E, F, best_endpos
 end
 
-function traceback(a, b, H, E, F, best_endpos, subst_matrix, gap_open_penalty, gap_extend_penalty)
+function affine_local_traceback(a, b, H, E, F, best_endpos, subst_matrix, gap_open_penalty, gap_extend_penalty)
     ge = gap_extend_penalty
     goe = gap_open_penalty + ge
     # gap/character counts (reversed order)

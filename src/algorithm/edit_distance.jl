@@ -22,7 +22,7 @@ function edit_distance{T}(a, b, subst_matrix::AbstractSubstitutionMatrix{T}, ins
     return D
 end
 
-function traceback(a, b, D, subst_matrix, insertion_cost, deletion_cost)
+function edit_traceback(a, b, D, subst_matrix, insertion_cost, deletion_cost)
     # gap/character counts (reversed order)
     counts_a = [0, 0]
     counts_b = [0, 0]

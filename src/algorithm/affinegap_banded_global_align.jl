@@ -65,7 +65,7 @@ function affinegap_banded_global_align{T}(a, b, L::Int, U::Int, subst_matrix::Ab
     return H, E, F, (m-n+U+1, n+1)
 end
 
-function traceback(a, b, H, E, F, L, U, subst_matrix, gap_open_penalty, gap_extend_penalty)
+function affinegap_banded_global_traceback(a, b, H, E, F, L, U, subst_matrix, gap_open_penalty, gap_extend_penalty)
     m = length(a)
     n = length(b)
     ge = gap_extend_penalty

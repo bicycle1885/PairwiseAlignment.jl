@@ -23,7 +23,7 @@ function pairalign{S1,S2}(::GlobalAlignment, a::S1, b::S2, score::AffineGapScore
             return AlignmentResult(S1, S2, H[bestpos...])
         else
             H, E, F, bestpos = affinegap_banded_global_align(a, b, L, U, subst_matrix, gap_open_penalty, gap_extend_penalty)
-            a′, b′ = traceback(a, b, H, E, F, L, U, subst_matrix, gap_open_penalty, gap_extend_penalty)
+            a′, b′ = affinegap_banded_global_traceback(a, b, H, E, F, L, U, subst_matrix, gap_open_penalty, gap_extend_penalty)
             return AlignmentResult(H[bestpos...], a′, b′)
         end
     else
@@ -51,7 +51,7 @@ function pairalign{S1,S2}(::LocalAlignment, a::S1, b::S2, score::AffineGapScoreM
         return AlignmentResult(S1, S2, H[best_endpos[1]+1,best_endpos[2]+1])
     else
         H, E, F, best_endpos = affinegap_local_align(a, b, subst_matrix, gap_open_penalty, gap_extend_penalty)
-        a′, b′ = traceback(a, b, H, E, F, best_endpos, subst_matrix, gap_open_penalty, gap_extend_penalty)
+        a′, b′ = affine_local_traceback(a, b, H, E, F, best_endpos, subst_matrix, gap_open_penalty, gap_extend_penalty)
         return AlignmentResult(H[best_endpos[1]+1,best_endpos[2]+1], a′, b′)
     end
     error("not implemented")
@@ -86,7 +86,7 @@ function pairalign{S1,S2}(::EditDistance, a::S1, b::S2, cost::CostModel;
         return AlignmentResult(S1, S2, D[end,end])
     else
         D = edit_distance(a, b, subst_matrix, insertion_cost, deletion_cost)
-        a′, b′ = traceback(a, b, D, subst_matrix, insertion_cost, deletion_cost)
+        a′, b′ = edit_traceback(a, b, D, subst_matrix, insertion_cost, deletion_cost)
         return AlignmentResult(D[end,end], a′, b′)
     end
 end
