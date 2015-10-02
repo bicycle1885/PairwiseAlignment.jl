@@ -8,7 +8,7 @@ type GappedSequence{S}
     counts::Vector{Int}  # the alternative number of char and gap counts
     function GappedSequence(seq::S, startpos::Integer, counts::Vector)
         @assert 1 ≤ startpos
-        @assert rem(length(counts), 2) == 0
+        @assert iseven(length(counts))
         len = sum(counts)
         return new(seq, startpos, len, counts)
     end
@@ -79,11 +79,11 @@ function push_gaps!(gseq::GappedSequence, n_gaps::Integer)
 end
 
 function Base.append!(gseq::GappedSequence, counts::Vector)
-    @assert rem(length(counts), 2) == 0
-    d = sum(counts)
-    # TODO: check boundaries
-    append!(gseq.counts, counts)
-    gseq.len += d
+    @assert iseven(length(counts))
+    for i in 1:div(length(counts), 2)
+        push_chars!(gseq, counts[2i-1])
+        push_gaps!(gseq, counts[2i])
+    end
     return gseq
 end
 
