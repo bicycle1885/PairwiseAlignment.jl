@@ -6,7 +6,7 @@ function pairalign{S1,S2}(::GlobalAlignment, a::S1, b::S2, score::AffineGapScore
                           banded::Bool=false, lower::Int=0, upper::Int=0,
                           #linear_space::Bool=score_only,
                           )
-    subst_matrix = score.subst_matrix
+    submat = score.submat
     gap_open_penalty = score.gap_open_penalty
     gap_extend_penalty = score.gap_extend_penalty
     if banded
@@ -19,20 +19,20 @@ function pairalign{S1,S2}(::GlobalAlignment, a::S1, b::S2, score::AffineGapScore
             error("the ending position is not included in the band")
         end
         if score_only
-            H, _, _, bestpos = affinegap_banded_global_align(a, b, L, U, subst_matrix, gap_open_penalty, gap_extend_penalty)
+            H, _, _, bestpos = affinegap_banded_global_align(a, b, L, U, submat, gap_open_penalty, gap_extend_penalty)
             return AlignmentResult(S1, S2, H[bestpos...])
         else
-            H, E, F, bestpos = affinegap_banded_global_align(a, b, L, U, subst_matrix, gap_open_penalty, gap_extend_penalty)
-            a′, b′ = affinegap_banded_global_traceback(a, b, H, E, F, L, U, subst_matrix, gap_open_penalty, gap_extend_penalty)
+            H, E, F, bestpos = affinegap_banded_global_align(a, b, L, U, submat, gap_open_penalty, gap_extend_penalty)
+            a′, b′ = affinegap_banded_global_traceback(a, b, H, E, F, L, U, submat, gap_open_penalty, gap_extend_penalty)
             return AlignmentResult(H[bestpos...], a′, b′)
         end
     else
         if score_only
-            H, _, _ = affinegap_global_align(a, b, subst_matrix, gap_open_penalty, gap_extend_penalty)
+            H, _, _ = affinegap_global_align(a, b, submat, gap_open_penalty, gap_extend_penalty)
             return AlignmentResult(S1, S2, H[end,end])
         else
-            H, E, F = affinegap_global_align(a, b, subst_matrix, gap_open_penalty, gap_extend_penalty)
-            a′, b′ = affinegap_global_traceback(a, b, H, E, F, (length(a), length(b)), subst_matrix, gap_open_penalty, gap_extend_penalty)
+            H, E, F = affinegap_global_align(a, b, submat, gap_open_penalty, gap_extend_penalty)
+            a′, b′ = affinegap_global_traceback(a, b, H, E, F, (length(a), length(b)), submat, gap_open_penalty, gap_extend_penalty)
             return AlignmentResult(H[end,end], a′, b′)
         end
     end
@@ -43,15 +43,15 @@ function pairalign{S1,S2}(::LocalAlignment, a::S1, b::S2, score::AffineGapScoreM
                           score_only::Bool=false,
                           #linear_space::Bool=score_only
                           )
-    subst_matrix = score.subst_matrix
+    submat = score.submat
     gap_open_penalty = score.gap_open_penalty
     gap_extend_penalty = score.gap_extend_penalty
     if score_only
-        H, _, _, best_endpos = affinegap_local_align(a, b, subst_matrix, gap_open_penalty, gap_extend_penalty)
+        H, _, _, best_endpos = affinegap_local_align(a, b, submat, gap_open_penalty, gap_extend_penalty)
         return AlignmentResult(S1, S2, H[best_endpos[1]+1,best_endpos[2]+1])
     else
-        H, E, F, best_endpos = affinegap_local_align(a, b, subst_matrix, gap_open_penalty, gap_extend_penalty)
-        a′, b′ = affine_local_traceback(a, b, H, E, F, best_endpos, subst_matrix, gap_open_penalty, gap_extend_penalty)
+        H, E, F, best_endpos = affinegap_local_align(a, b, submat, gap_open_penalty, gap_extend_penalty)
+        a′, b′ = affine_local_traceback(a, b, H, E, F, best_endpos, submat, gap_open_penalty, gap_extend_penalty)
         return AlignmentResult(H[best_endpos[1]+1,best_endpos[2]+1], a′, b′)
     end
     error("not implemented")
@@ -59,18 +59,18 @@ end
 
 function pairalign{S1,S2}(::SemiGlobalAlignment, a::S1, b::S2, score::AffineGapScoreModel;
                           score_only::Bool=false)
-    subst_matrix = score.subst_matrix
+    submat = score.submat
     gap_open_penalty = score.gap_open_penalty
     gap_extend_penalty = score.gap_extend_penalty
     if length(a) > length(b)
         error("the first sequence should be shorter or equal to the second sequence")
     end
     if score_only
-        H, _, _, best_endpos = affinegap_semiglobal_align(a, b, subst_matrix, gap_open_penalty, gap_extend_penalty)
+        H, _, _, best_endpos = affinegap_semiglobal_align(a, b, submat, gap_open_penalty, gap_extend_penalty)
         return AlignmentResult(S1, S2, H[best_endpos[1]+1,best_endpos[2]+1])
     else
-        H, E, F, best_endpos = affinegap_semiglobal_align(a, b, subst_matrix, gap_open_penalty, gap_extend_penalty)
-        a′, b′ = semiglobal_traceback(a, b, H, E, F, best_endpos, subst_matrix, gap_open_penalty, gap_extend_penalty)
+        H, E, F, best_endpos = affinegap_semiglobal_align(a, b, submat, gap_open_penalty, gap_extend_penalty)
+        a′, b′ = semiglobal_traceback(a, b, H, E, F, best_endpos, submat, gap_open_penalty, gap_extend_penalty)
         return AlignmentResult(H[best_endpos[1]+1,best_endpos[2]+1], a′, b′)
     end
     error("not implemented")
@@ -78,15 +78,15 @@ end
 
 function pairalign{S1,S2}(::EditDistance, a::S1, b::S2, cost::CostModel;
                           distance_only::Bool=false)
-    subst_matrix = cost.subst_matrix
+    submat = cost.submat
     insertion_cost = cost.insertion_cost
     deletion_cost = cost.deletion_cost
     if distance_only
-        D = edit_distance(a, b, subst_matrix, insertion_cost, deletion_cost)
+        D = edit_distance(a, b, submat, insertion_cost, deletion_cost)
         return AlignmentResult(S1, S2, D[end,end])
     else
-        D = edit_distance(a, b, subst_matrix, insertion_cost, deletion_cost)
-        a′, b′ = edit_traceback(a, b, D, subst_matrix, insertion_cost, deletion_cost)
+        D = edit_distance(a, b, submat, insertion_cost, deletion_cost)
+        a′, b′ = edit_traceback(a, b, D, submat, insertion_cost, deletion_cost)
         return AlignmentResult(D[end,end], a′, b′)
     end
 end

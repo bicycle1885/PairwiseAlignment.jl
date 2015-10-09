@@ -2,7 +2,7 @@
 # -------------------------------
 
 # global-local alignment
-function affinegap_semiglobal_align{T}(a, b, subst_matrix::AbstractSubstitutionMatrix{T}, gap_open_penalty::T, gap_extend_penalty::T)
+function affinegap_semiglobal_align{T}(a, b, submat::AbstractSubstitutionMatrix{T}, gap_open_penalty::T, gap_extend_penalty::T)
     m = length(a)
     n = length(b)
     go = gap_open_penalty
@@ -41,7 +41,7 @@ function affinegap_semiglobal_align{T}(a, b, subst_matrix::AbstractSubstitutionM
                 H[i+1,j+1] = max(
                     E[i,j],
                     F[i,j],
-                    H[i,j] + subst_matrix[a[i],b[j]]
+                    H[i,j] + submat[a[i],b[j]]
                 )
             end
             if H[m+1,j+1] > best_score
@@ -54,7 +54,7 @@ function affinegap_semiglobal_align{T}(a, b, subst_matrix::AbstractSubstitutionM
 end
 
 
-function semiglobal_traceback(a, b, H, E, F, best_endpos, subst_matrix, gap_open_penalty, gap_extend_penalty)
+function semiglobal_traceback(a, b, H, E, F, best_endpos, submat, gap_open_penalty, gap_extend_penalty)
     ge = gap_extend_penalty
     goe = gap_open_penalty + ge
     # gap/character counts (reversed order)
@@ -81,7 +81,7 @@ function semiglobal_traceback(a, b, H, E, F, best_endpos, subst_matrix, gap_open
             elseif F[i,j] == H[i,j+1] - goe
                 @gapopen b
             end
-        elseif H[i+1,j+1] == H[i,j] + subst_matrix[a[i],b[j]]
+        elseif H[i+1,j+1] == H[i,j] + submat[a[i],b[j]]
             @match
         elseif H[i+1,j+1] == E[i,j]
             # gap in a

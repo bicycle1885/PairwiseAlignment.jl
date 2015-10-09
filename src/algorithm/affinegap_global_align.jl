@@ -1,7 +1,7 @@
 # Gotoh's algorithm (Global)
 # --------------------------
 
-function affinegap_global_align{T}(a, b, subst_matrix::AbstractSubstitutionMatrix{T}, gap_open_penalty::T, gap_extend_penalty::T)
+function affinegap_global_align{T}(a, b, submat::AbstractSubstitutionMatrix{T}, gap_open_penalty::T, gap_extend_penalty::T)
     m = length(a)
     n = length(b)
     go = gap_open_penalty
@@ -38,7 +38,7 @@ function affinegap_global_align{T}(a, b, subst_matrix::AbstractSubstitutionMatri
                 H[i+1,j+1] = max(
                     E[i,j],
                     F[i,j],
-                    H[i,j] + subst_matrix[a[i],b[j]]
+                    H[i,j] + submat[a[i],b[j]]
                 )
             end
         end
@@ -46,7 +46,7 @@ function affinegap_global_align{T}(a, b, subst_matrix::AbstractSubstitutionMatri
     return H, E, F
 end
 
-function affinegap_global_traceback(a, b, H, E, F, endpos, subst_matrix, gap_open_penalty, gap_extend_penalty)
+function affinegap_global_traceback(a, b, H, E, F, endpos, submat, gap_open_penalty, gap_extend_penalty)
     ge = gap_extend_penalty
     goe = gap_open_penalty + ge
     # gap/character counts (reversed order)
@@ -71,7 +71,7 @@ function affinegap_global_traceback(a, b, H, E, F, endpos, subst_matrix, gap_ope
             elseif F[i,j] == H[i,j+1] - goe
                 @gapopen b
             end
-        elseif H[i+1,j+1] == H[i,j] + subst_matrix[a[i],b[j]]
+        elseif H[i+1,j+1] == H[i,j] + submat[a[i],b[j]]
             @match
         elseif H[i+1,j+1] == E[i,j]
             # gap in a

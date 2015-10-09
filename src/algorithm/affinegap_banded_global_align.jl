@@ -1,6 +1,6 @@
 # Run dynamic programming only within a band.
 # Formally, a[i] and b[j] can be matched only if -L ≤ j - i ≤ U.
-function affinegap_banded_global_align{T}(a, b, L::Int, U::Int, subst_matrix::AbstractSubstitutionMatrix{T}, gap_open_penalty::T, gap_extend_penalty::T)
+function affinegap_banded_global_align{T}(a, b, L::Int, U::Int, submat::AbstractSubstitutionMatrix{T}, gap_open_penalty::T, gap_extend_penalty::T)
     m = length(a)
     n = length(b)
     go = gap_open_penalty
@@ -56,7 +56,7 @@ function affinegap_banded_global_align{T}(a, b, L::Int, U::Int, subst_matrix::Ab
                 H[i-j+U+1,j+1] = max(
                     E[i-j+U+1,j],
                     F[i-j+U+1,j],
-                    H[(i-1)-(j-1)+U+1,(j-1)+1] + subst_matrix[a[i],b[j]]
+                    H[(i-1)-(j-1)+U+1,(j-1)+1] + submat[a[i],b[j]]
                 )
             end
         end
@@ -65,7 +65,7 @@ function affinegap_banded_global_align{T}(a, b, L::Int, U::Int, subst_matrix::Ab
     return H, E, F, (m-n+U+1, n+1)
 end
 
-function affinegap_banded_global_traceback(a, b, H, E, F, L, U, subst_matrix, gap_open_penalty, gap_extend_penalty)
+function affinegap_banded_global_traceback(a, b, H, E, F, L, U, submat, gap_open_penalty, gap_extend_penalty)
     m = length(a)
     n = length(b)
     ge = gap_extend_penalty
@@ -95,7 +95,7 @@ function affinegap_banded_global_traceback(a, b, H, E, F, L, U, subst_matrix, ga
             elseif F[i-j+U+1,j] == H[(i-1)-j+U+1,j+1] - goe
                 @gapopen b
             end
-        elseif H[i-j+U+1,j+1] == H[(i-1)-(j-1)+U+1,(j-1)+1] + subst_matrix[a[i],b[j]]
+        elseif H[i-j+U+1,j+1] == H[(i-1)-(j-1)+U+1,(j-1)+1] + submat[a[i],b[j]]
             @match
         elseif H[i-j+U+1,j+1] == E[i-j+U+1,j] && j > i - L
             if E[i-j+U+1,j] == E[i-(j-1)+U+1,j-1] - ge

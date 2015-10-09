@@ -1,7 +1,7 @@
 # Gotoh's algorithm (Local)
 # -------------------------
 
-function affinegap_local_align{T}(a, b, subst_matrix::AbstractSubstitutionMatrix{T}, gap_open_penalty::T, gap_extend_penalty::T)
+function affinegap_local_align{T}(a, b, submat::AbstractSubstitutionMatrix{T}, gap_open_penalty::T, gap_extend_penalty::T)
     m = length(a)
     n = length(b)
     ge = gap_extend_penalty
@@ -40,7 +40,7 @@ function affinegap_local_align{T}(a, b, subst_matrix::AbstractSubstitutionMatrix
                     T(0),
                     E[i,j],
                     F[i,j],
-                    H[i,j] + subst_matrix[a[i],b[j]]
+                    H[i,j] + submat[a[i],b[j]]
                 )
                 if H[i+1,j+1] > best_score
                     best_score = H[i+1,j+1]
@@ -52,7 +52,7 @@ function affinegap_local_align{T}(a, b, subst_matrix::AbstractSubstitutionMatrix
     return H, E, F, best_endpos
 end
 
-function affine_local_traceback(a, b, H, E, F, best_endpos, subst_matrix, gap_open_penalty, gap_extend_penalty)
+function affine_local_traceback(a, b, H, E, F, best_endpos, submat, gap_open_penalty, gap_extend_penalty)
     ge = gap_extend_penalty
     goe = gap_open_penalty + ge
     # gap/character counts (reversed order)
@@ -77,7 +77,7 @@ function affine_local_traceback(a, b, H, E, F, best_endpos, subst_matrix, gap_op
             elseif F[i,j] == H[i,j+1] - goe
                 @gapopen b
             end
-        elseif H[i+1,j+1] == H[i,j] + subst_matrix[a[i],b[j]]
+        elseif H[i+1,j+1] == H[i,j] + submat[a[i],b[j]]
             @match
         elseif H[i+1,j+1] == E[i,j]
             # gap in a

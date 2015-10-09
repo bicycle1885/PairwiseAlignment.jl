@@ -84,15 +84,15 @@ end
 
 let
     # a substitution matrix
-    subst_matrix = SubstitutionMatrix(eye(5, 5))
-    @test subst_matrix[0,0] == 1.0
-    @test subst_matrix[0,1] == 0.0
-    subst_matrix[0,1] = -1.0
-    @test subst_matrix[0,1] == -1.0
+    submat = SubstitutionMatrix(eye(5, 5))
+    @test submat[0,0] == 1.0
+    @test submat[0,1] == 0.0
+    submat[0,1] = -1.0
+    @test submat[0,1] == -1.0
     # models
-    affine_gap = AffineGapScoreModel(subst_matrix, gap_open_penalty=2, gap_extend_penalty=1)
+    affine_gap = AffineGapScoreModel(submat, gap_open_penalty=2, gap_extend_penalty=1)
     @test isa(affine_gap, AffineGapScoreModel{Float64})
-    cost = CostModel(subst_matrix, insertion_cost=1, deletion_cost=2)
+    cost = CostModel(submat, insertion_cost=1, deletion_cost=2)
     @test isa(cost, CostModel{Float64})
 end
 

@@ -1,7 +1,7 @@
 # Edit distance
 # -------------
 
-function edit_distance{T}(a, b, subst_matrix::AbstractSubstitutionMatrix{T}, insertion_cost::T, deletion_cost::T)
+function edit_distance{T}(a, b, submat::AbstractSubstitutionMatrix{T}, insertion_cost::T, deletion_cost::T)
     m = length(a)
     n = length(b)
     D = Matrix{T}(m + 1, n + 1)
@@ -15,21 +15,21 @@ function edit_distance{T}(a, b, subst_matrix::AbstractSubstitutionMatrix{T}, ins
             D[i+1,j+1] = min(
                 D[i,  j+1] + deletion_cost,
                 D[i+1,j  ] + insertion_cost,
-                D[i  ,j  ] + subst_matrix[a[i],b[j]]
+                D[i  ,j  ] + submat[a[i],b[j]]
             )
         end
     end
     return D
 end
 
-function edit_traceback(a, b, D, subst_matrix, insertion_cost, deletion_cost)
+function edit_traceback(a, b, D, submat, insertion_cost, deletion_cost)
     # gap/character counts (reversed order)
     counts_a = [0, 0]
     counts_b = [0, 0]
     i = length(a)
     j = length(b)
     while i ≥ 1 && j ≥ 1
-        if D[i+1,j+1] == D[i,j] + subst_matrix[a[i],b[j]]
+        if D[i+1,j+1] == D[i,j] + submat[a[i],b[j]]
             @match
         elseif D[i+1,j+1] == D[i+1,j] + insertion_cost
             @gap a
