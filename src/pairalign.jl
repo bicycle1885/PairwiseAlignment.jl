@@ -28,12 +28,12 @@ function pairalign{S1,S2}(::GlobalAlignment, a::S1, b::S2, score::AffineGapScore
         end
     else
         if score_only
-            H, _, _ = affinegap_global_align(a, b, submat, gap_open_penalty, gap_extend_penalty)
-            return AlignmentResult(S1, S2, H[end,end])
+            score, _ = affinegap_global_align(a, b, submat, gap_open_penalty, gap_extend_penalty)
+            return AlignmentResult(S1, S2, score)
         else
-            H, E, F = affinegap_global_align(a, b, submat, gap_open_penalty, gap_extend_penalty)
-            a′, b′ = affinegap_global_traceback(a, b, H, E, F, (length(a), length(b)), submat, gap_open_penalty, gap_extend_penalty)
-            return AlignmentResult(H[end,end], a′, b′)
+            score, trace = affinegap_global_align(a, b, submat, gap_open_penalty, gap_extend_penalty)
+            a′, b′ = affinegap_global_traceback(a, b, trace, (length(a), length(b)))
+            return AlignmentResult(score, a′, b′)
         end
     end
     error("not implemented")
