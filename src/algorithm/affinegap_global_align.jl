@@ -14,11 +14,11 @@ function affinegap_global_align{T}(a, b, submat::AbstractSubstitutionMatrix{T}, 
             H[i+1] = affinegap_score(i, go, ge)
         end
         for j in 1:n
-            H′ = H[1]
+            h_diag = H[1]
             H[1] = affinegap_score(j, go, ge)
             F = T(0)  # any value goes well since this will be initialized in the first iteration
             for i in 1:m
-                # gap in A
+                # gap in the sequence A
                 e = H[i+1] - goe
                 gap_a = TRACE_GAPOPEN_A
                 if j > 1
@@ -30,7 +30,7 @@ function affinegap_global_align{T}(a, b, submat::AbstractSubstitutionMatrix{T}, 
                         e = e′
                     end
                 end
-                # gap in B
+                # gap in the sequence B
                 f = H[i] - goe
                 gap_b = TRACE_GAPOPEN_B
                 if i > 1
@@ -43,23 +43,19 @@ function affinegap_global_align{T}(a, b, submat::AbstractSubstitutionMatrix{T}, 
                     end
                 end
                 # match
-                h = H′ + submat[a[i],b[j]]
+                h = h_diag + submat[a[i],b[j]]
+                # find the best score and its trace
                 best = max(e, f, h)
-                t = 0x00
-                if e == best
-                    t |= gap_a
-                end
-                if f == best
-                    t |= gap_b
-                end
-                if h == best
-                    t |= TRACE_MATCH
-                end
-                trace[i+1,j+1] = t
+                t = TRACE_NONE
+                e == best && (t |= gap_a)
+                f == best && (t |= gap_b)
+                h == best && (t |= TRACE_MATCH)
+                # update
                 E[i] = e
                 F = f
-                H′ = H[i+1]
+                h_diag = H[i+1]
                 H[i+1] = best
+                trace[i+1,j+1] = t
             end
         end
     end

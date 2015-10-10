@@ -9,6 +9,7 @@ end
 typealias Trace UInt8
 
 # trace bitmap
+const TRACE_NONE      = 0b00000
 const TRACE_MATCH     = 0b00001
 const TRACE_GAPOPEN_A = 0b00010
 const TRACE_GAPEXTD_A = 0b00100
