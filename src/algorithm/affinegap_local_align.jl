@@ -1,60 +1,77 @@
-# Gotoh's algorithm (Local)
-# -------------------------
-
 function affinegap_local_align{T}(a, b, submat::AbstractSubstitutionMatrix{T}, gap_open_penalty::T, gap_extend_penalty::T)
     m = length(a)
     n = length(b)
     ge = gap_extend_penalty
     goe = gap_open_penalty + ge
-    H = Matrix{T}(m + 1, n + 1)
-    E = Matrix{T}(m, n)
-    F = Matrix{T}(m, n)
+    trace = Matrix{Trace}(m + 1, n + 1)
+    H = Vector{T}(m + 1)
+    E = Vector{T}(m)
     # run dynamic programming column by column
     @inbounds begin
-        H[1,1] = T(0)
+        H[1] = T(0)
+        trace[1,1] = TRACE_NONE
         for i in 1:m
-            H[i+1,1] = T(0)
+            H[i+1] = T(0)
+            trace[i+1,1] = TRACE_NONE
         end
         best_score = typemin(T)
         best_endpos = (0, 0)
         for j in 1:n
-            H[1,j+1] = T(0)
+            h_diag = H[1]
+            H[1] = T(0)
+            trace[1,j+1] = TRACE_NONE
+            # any value goes well since this will be set in the first iteration
+            F = T(0)
             for i in 1:m
-                E[i,j] = if j == 1
-                    H[i+1,j] - goe
-                else
-                    max(
-                        E[i,j-1] - ge,
-                        H[i+1,j] - goe
-                    )
+                # gap in the sequence A
+                e = H[i+1] - goe
+                gap_a = TRACE_GAPOPEN_A
+                if j > 1
+                    e′ = E[i] - ge
+                    if e′ == e
+                        gap_a |= TRACE_GAPEXTD_A
+                    elseif e′ > e
+                        gap_a  = TRACE_GAPEXTD_A
+                        e = e′
+                    end
                 end
-                F[i,j] = if i == 1
-                    H[i,j+1] - goe
-                else
-                    max(
-                        F[i-1,j] - ge,
-                        H[i,j+1] - goe
-                    )
+                # gap in the sequence B
+                f = H[i] - goe
+                gap_b = TRACE_GAPOPEN_B
+                if i > 1
+                    f′ = F - ge
+                    if f′ == f
+                        gap_b |= TRACE_GAPEXTD_B
+                    elseif f′ > f
+                        gap_b  = TRACE_GAPEXTD_B
+                        f = f′
+                    end
                 end
-                H[i+1,j+1] = max(
-                    T(0),
-                    E[i,j],
-                    F[i,j],
-                    H[i,j] + submat[a[i],b[j]]
-                )
-                if H[i+1,j+1] > best_score
-                    best_score = H[i+1,j+1]
+                # match
+                h = h_diag + submat[a[i],b[j]]
+                # find the best score and its trace
+                best = max(T(0), e, f, h)
+                t = TRACE_NONE
+                e == best && (t |= gap_a)
+                f == best && (t |= gap_b)
+                h == best && (t |= TRACE_MATCH)
+                # update
+                E[i] = e
+                F = f
+                h_diag = H[i+1]
+                H[i+1] = best
+                trace[i+1,j+1] = t
+                if best > best_score
+                    best_score = best
                     best_endpos = (i, j)
                 end
             end
         end
     end
-    return H, E, F, best_endpos
+    return best_score, trace, best_endpos
 end
 
-function affine_local_traceback(a, b, H, E, F, best_endpos, submat, gap_open_penalty, gap_extend_penalty)
-    ge = gap_extend_penalty
-    goe = gap_open_penalty + ge
+function affine_local_traceback(a, b, trace, endpos)
     # gap/character counts (reversed order)
     counts_a = [0, 0]
     counts_b = [0, 0]
@@ -62,46 +79,38 @@ function affine_local_traceback(a, b, H, E, F, best_endpos, submat, gap_open_pen
     # gap extension or gap open in that direction should be selected.
     gapext_a = false
     gapext_b = false
-    i, j = best_endpos
-    while H[i,j] > 0
+    i, j = endpos
+    while trace[i+1,j+1] != TRACE_NONE
         @assert !(gapext_a && gapext_b)
+        t = trace[i+1,j+1]
         if gapext_a
-            if j ≥ 2 && E[i,j] == E[i,j-1] - ge
+            if j ≥ 2 && t & TRACE_GAPEXTD_A > 0
                 @gapext a
-            elseif E[i,j] == H[i+1,j] - goe
+            elseif t & TRACE_GAPOPEN_A > 0
                 @gapopen a
             end
         elseif gapext_b
-            if i ≥ 2 && F[i,j] == F[i-1,j] - ge
+            if i ≥ 2 && t & TRACE_GAPEXTD_B > 0
                 @gapext b
-            elseif F[i,j] == H[i,j+1] - goe
+            elseif t & TRACE_GAPOPEN_B > 0
                 @gapopen b
             end
-        elseif H[i+1,j+1] == H[i,j] + submat[a[i],b[j]]
+        elseif t & TRACE_MATCH > 0
             @match
-        elseif H[i+1,j+1] == E[i,j]
-            # gap in a
-            if j ≥ 2 && E[i,j] == E[i,j-1] - ge
-                @gapext a
-            elseif E[i,j] == H[i+1,j] - goe
-                @gapopen a
-            end
-        elseif H[i+1,j+1] == F[i,j]
-            # gap in b
-            if i ≥ 2 && F[i,j] == F[i-1,j] - ge
-                @gapext b
-            elseif F[i,j] == H[i,j+1] - goe
-                @gapopen b
-            end
+        elseif j ≥ 2 && t & TRACE_GAPEXTD_A > 0
+            @gapext a
+        elseif t & TRACE_GAPOPEN_A > 0
+            @gapopen a
+        elseif i ≥ 2 && t & TRACE_GAPEXTD_B > 0
+            @gapext b
+        elseif t & TRACE_GAPOPEN_B > 0
+            @gapopen b
         end
         # do not come here
         @assert false
     end
     # update counts
-    @assert a[i] == b[j]
-    update_counts!(counts_a, false)
-    update_counts!(counts_b, false)
     reverse!(counts_a)
     reverse!(counts_b)
-    return GappedSequence(a, i, counts_a), GappedSequence(b, j, counts_b)
+    return GappedSequence(a, i + 1, counts_a), GappedSequence(b, j + 1, counts_b)
 end

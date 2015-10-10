@@ -10,13 +10,17 @@ function affinegap_global_align{T}(a, b, submat::AbstractSubstitutionMatrix{T}, 
     # run dynamic programming column by column
     @inbounds begin
         H[1] = T(0)
+        trace[1,1] = TRACE_NONE
         for i in 1:m
             H[i+1] = affinegap_score(i, go, ge)
+            trace[i+1,1] = TRACE_NONE
         end
         for j in 1:n
             h_diag = H[1]
             H[1] = affinegap_score(j, go, ge)
-            F = T(0)  # any value goes well since this will be initialized in the first iteration
+            trace[1,j+1] = TRACE_NONE
+            # any value goes well since this will be set in the first iteration
+            F = T(0)
             for i in 1:m
                 # gap in the sequence A
                 e = H[i+1] - goe

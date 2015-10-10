@@ -47,12 +47,12 @@ function pairalign{S1,S2}(::LocalAlignment, a::S1, b::S2, score::AffineGapScoreM
     gap_open_penalty = score.gap_open_penalty
     gap_extend_penalty = score.gap_extend_penalty
     if score_only
-        H, _, _, best_endpos = affinegap_local_align(a, b, submat, gap_open_penalty, gap_extend_penalty)
-        return AlignmentResult(S1, S2, H[best_endpos[1]+1,best_endpos[2]+1])
+        score, _, _ = affinegap_local_align(a, b, submat, gap_open_penalty, gap_extend_penalty)
+        return AlignmentResult(S1, S2, score)
     else
-        H, E, F, best_endpos = affinegap_local_align(a, b, submat, gap_open_penalty, gap_extend_penalty)
-        a′, b′ = affine_local_traceback(a, b, H, E, F, best_endpos, submat, gap_open_penalty, gap_extend_penalty)
-        return AlignmentResult(H[best_endpos[1]+1,best_endpos[2]+1], a′, b′)
+        score, trace, best_endpos = affinegap_local_align(a, b, submat, gap_open_penalty, gap_extend_penalty)
+        a′, b′ = affine_local_traceback(a, b, trace, best_endpos)
+        return AlignmentResult(score, a′, b′)
     end
     error("not implemented")
 end
