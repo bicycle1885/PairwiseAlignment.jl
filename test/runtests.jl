@@ -376,6 +376,8 @@ let
     b = "A"
     aln = pairalign(SemiGlobalAlignment(), a, b, affinegap)
     @test aln.score == 0
+    aln = pairalign(SemiGlobalAlignment(), a, b, affinegap, score_only=true)
+    @test aln.score == 0
 
     a =        "ACGT"
     b = "GATHAGCACGTAGTA"

@@ -66,12 +66,12 @@ function pairalign{S1,S2}(::SemiGlobalAlignment, a::S1, b::S2, score::AffineGapS
         error("the first sequence should be shorter or equal to the second sequence")
     end
     if score_only
-        H, _, _, best_endpos = affinegap_semiglobal_align(a, b, submat, gap_open_penalty, gap_extend_penalty)
-        return AlignmentResult(S1, S2, H[best_endpos[1]+1,best_endpos[2]+1])
+        score, _, _ = affinegap_semiglobal_align(a, b, submat, gap_open_penalty, gap_extend_penalty)
+        return AlignmentResult(S1, S2, score)
     else
-        H, E, F, best_endpos = affinegap_semiglobal_align(a, b, submat, gap_open_penalty, gap_extend_penalty)
-        a′, b′ = semiglobal_traceback(a, b, H, E, F, best_endpos, submat, gap_open_penalty, gap_extend_penalty)
-        return AlignmentResult(H[best_endpos[1]+1,best_endpos[2]+1], a′, b′)
+        score, trace, endpos = affinegap_semiglobal_align(a, b, submat, gap_open_penalty, gap_extend_penalty)
+        a′, b′ = semiglobal_traceback(a, b, trace, endpos)
+        return AlignmentResult(score, a′, b′)
     end
     error("not implemented")
 end
