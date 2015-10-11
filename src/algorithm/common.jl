@@ -5,6 +5,7 @@ function affinegap_score(k, gap_open_penalty, gap_extend_penalty)
     return -(gap_open_penalty + gap_extend_penalty * k)
 end
 
+
 # trace type for pairwise alignment
 typealias Trace UInt8
 

@@ -19,12 +19,12 @@ function pairalign{S1,S2}(::GlobalAlignment, a::S1, b::S2, score::AffineGapScore
             error("the ending position is not included in the band")
         end
         if score_only
-            H, _, _, bestpos = affinegap_banded_global_align(a, b, L, U, submat, gap_open_penalty, gap_extend_penalty)
-            return AlignmentResult(S1, S2, H[bestpos...])
+            score, _ = affinegap_banded_global_align(a, b, L, U, submat, gap_open_penalty, gap_extend_penalty)
+            return AlignmentResult(S1, S2, score)
         else
-            H, E, F, bestpos = affinegap_banded_global_align(a, b, L, U, submat, gap_open_penalty, gap_extend_penalty)
-            a′, b′ = affinegap_banded_global_traceback(a, b, H, E, F, L, U, submat, gap_open_penalty, gap_extend_penalty)
-            return AlignmentResult(H[bestpos...], a′, b′)
+            score, trace = affinegap_banded_global_align(a, b, L, U, submat, gap_open_penalty, gap_extend_penalty)
+            a′, b′ = affinegap_banded_global_traceback(a, b, L, U, trace, (length(a), length(b)))
+            return AlignmentResult(score, a′, b′)
         end
     else
         if score_only

@@ -13,12 +13,12 @@ function affinegap_global_align{T}(a, b, submat::AbstractSubstitutionMatrix{T}, 
         trace[1,1] = TRACE_NONE
         for i in 1:m
             H[i+1] = affinegap_score(i, go, ge)
-            trace[i+1,1] = TRACE_NONE
+            trace[i+1,1] = i == 1 ? TRACE_GAPOPEN_B : TRACE_GAPEXTD_B
         end
         for j in 1:n
             h_diag = H[1]
             H[1] = affinegap_score(j, go, ge)
-            trace[1,j+1] = TRACE_NONE
+            trace[1,j+1] = j == 1 ? TRACE_GAPOPEN_A : TRACE_GAPEXTD_A
             # any value goes well since this will be set in the first iteration
             F = T(0)
             for i in 1:m
