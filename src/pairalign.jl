@@ -82,16 +82,16 @@ function pairalign{S1,S2}(::EditDistance, a::S1, b::S2, cost::CostModel;
     insertion_cost = cost.insertion_cost
     deletion_cost = cost.deletion_cost
     if distance_only
-        D = edit_distance(a, b, submat, insertion_cost, deletion_cost)
-        return AlignmentResult(S1, S2, D[end,end])
+        cost, _ = edit_distance(a, b, submat, insertion_cost, deletion_cost)
+        return AlignmentResult(S1, S2, cost)
     else
-        D = edit_distance(a, b, submat, insertion_cost, deletion_cost)
-        a′, b′ = edit_traceback(a, b, D, submat, insertion_cost, deletion_cost)
-        return AlignmentResult(D[end,end], a′, b′)
+        cost, trace = edit_distance(a, b, submat, insertion_cost, deletion_cost)
+        a′, b′ = edit_traceback(a, b, trace, (length(a), length(b)))
+        return AlignmentResult(cost, a′, b′)
     end
 end
 
-function pairalign(::LevenshteinDistance, a, b;
+function pairalign{S1,S2}(::LevenshteinDistance, a::S1, b::S2;
                    distance_only::Bool=false)
     unitcost = CostModel(
         UnitSubstitutionCost{Int}(),

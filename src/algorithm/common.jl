@@ -10,12 +10,14 @@ end
 typealias Trace UInt8
 
 # trace bitmap
-const TRACE_NONE      = 0b00000
-const TRACE_MATCH     = 0b00001
-const TRACE_GAPOPEN_A = 0b00010
-const TRACE_GAPEXTD_A = 0b00100
-const TRACE_GAPOPEN_B = 0b01000
-const TRACE_GAPEXTD_B = 0b10000
+const TRACE_NONE      = 0b00000000
+const TRACE_MATCH     = 0b00000001
+const TRACE_GAPOPEN_A = 0b00000010
+const TRACE_GAPEXTD_A = 0b00000100
+const TRACE_GAPOPEN_B = 0b00001000
+const TRACE_GAPEXTD_B = 0b00010000
+const TRACE_DELETE    = 0b00100000
+const TRACE_INSERT    = 0b01000000
 
 
 # update counts of a gapped sequence

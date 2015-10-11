@@ -444,6 +444,8 @@ let
     b = "ACGT"
     aln = pairalign(EditDistance(), a, b, costmodel)
     @test aln.score == 0
+    aln = pairalign(EditDistance(), a, b, costmodel, distance_only=true)
+    @test aln.score == 0
 
     # substitution
     a = "ACGT"

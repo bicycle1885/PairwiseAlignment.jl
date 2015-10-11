@@ -1,6 +1,3 @@
-# Hamming distance
-# ----------------
-
 function hamming_distance{T}(::Type{T}, a, b)
     @assert length(a) == length(b)
     d = T(0)
